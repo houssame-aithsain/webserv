@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:13 by gothmane          #+#    #+#             */
-/*   Updated: 2024/01/08 14:58:57 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/01/08 18:21:22 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,57 @@ std::string ft_trim(const std::string& str)
         return str;
     size_t last = str.find_last_not_of(" \"\t");
     return str.substr(first, (last - first + 1));
+}
+
+std::vector<std::string>  ft_split_the_multiple_data(std::string value)
+{
+    int open_brackets = 0;
+    int close_brackets = 0;
+    int open_dq = 0;
+    int close_dq = 0;
+    std::stringstream ss(value);
+    // check begin and end format
+    size_t i = 0;
+    std::cout << "value = " << value[i] << std::endl;
+    if (value[i] == '[' && value[i + 1] && value[i + 1] == '\"')
+    {
+        open_brackets = 1;
+        open_dq = 1;
+    }
+    i = value.size();
+    if (value[i] == '[' && value[i - 1] && value[i - 1] == '\"')
+    {
+        close_brackets = 1;
+        close_dq = 1;
+    }
+
+    if ((open_brackets == 1 && open_dq != 1) || (close_brackets == 1 && close_dq != 1))
+    {
+        std::cout << "OB = " << open_brackets << " OD = " << open_dq << " CB = " << close_brackets << " close_dq = " << close_dq << "\n";
+       std::cout << "Error in [\"\"]\n";
+    }
+    else if (open_brackets == 0 && close_brackets == 0)
+    {
+        std::vector<std::string> v ;
+
+        v.push_back(value);
+        return (v);
+    }
+    
+    //remove brackets
+    std::string no_brackets_value = value.substr(1, value.size() - 2); 
+    std::string item;
+    std::vector<std::string> result;
+    while (std::getline(ss, item, ','))
+    {
+        item = item.substr(1, item.size() - 2);
+        result.push_back(item);
+    }
+    for (size_t i = 0; i < result.size(); i++)
+    {
+        std::cout << result[i] << std::endl;
+    }
+    return (result);
 }
 
 void Parser::ft_read_nd_parse(std::string fileName)
@@ -74,7 +125,7 @@ void Parser::ft_read_nd_parse(std::string fileName)
             {
                 std::string key = ft_trim((line.substr(0, line.find("="))));
                 std::vector<std::string> value;
-                value.push_back(ft_trim(line.substr(line.find("=") + 1, line.size())));
+                value = ft_split_the_multiple_data(ft_trim(line.substr(line.find("=") + 1, line.size())));
                 data.server.push_back(std::make_pair(key, value));
             }
             else if (location_side > 0)
@@ -91,6 +142,8 @@ void Parser::ft_read_nd_parse(std::string fileName)
         if (server_side > 0)
             wrapper.push_back(data);
     }
+
+    // Printing
 std::size_t r = 1;
 for (std::vector<server_data>::iterator it = wrapper.begin(); it != wrapper.end(); ++it, ++r) {
     std::cout << "Server data " << i << ":\n";

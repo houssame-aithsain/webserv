@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:15 by gothmane          #+#    #+#             */
-/*   Updated: 2024/01/08 14:47:27 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/01/08 18:08:02 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <sstream>
 
 typedef struct t_server_data
 {
