@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:15 by gothmane          #+#    #+#             */
-/*   Updated: 2024/01/08 12:57:00 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/01/08 14:47:27 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,5 +37,7 @@ class Parser
         // void setServer(const std::vector<std::pair<std::string, std::vector<std::string> > > &server);
 
         void ft_read_nd_parse(std::string fileName);
+        void    ft_parse_data_step2();
+
 
 };

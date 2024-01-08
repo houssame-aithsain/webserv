@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:13 by gothmane          #+#    #+#             */
-/*   Updated: 2024/01/08 13:10:40 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/01/08 14:58:57 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,14 @@ Parser &Parser::operator=(const Parser &pr)
     return (*this);
 }
 
-
+std::string ft_trim(const std::string& str)
+{
+    size_t first = str.find_first_not_of(" \"\t");
+    if (std::string::npos == first)
+        return str;
+    size_t last = str.find_last_not_of(" \"\t");
+    return str.substr(first, (last - first + 1));
+}
 
 void Parser::ft_read_nd_parse(std::string fileName)
 {
@@ -58,34 +65,27 @@ void Parser::ft_read_nd_parse(std::string fileName)
             }
             else if (line == "	[[server.location]]")
             {
-                // server_side = 0;
                 server_id = server_side;
                 location_side++;
                 j++;
-                std::cout << "Server id = " << server_id << " location id = " << location_side << std::endl;
                 continue;
             }
             if (server_id != server_side && location_side == 0)
             {
-                std::string key = line.substr(0, line.find("="));
+                std::string key = ft_trim((line.substr(0, line.find("="))));
                 std::vector<std::string> value;
-                value.push_back(line.substr(line.find("=") + 1, line.size()));
+                value.push_back(ft_trim(line.substr(line.find("=") + 1, line.size())));
                 data.server.push_back(std::make_pair(key, value));
-                // server.erase();
             }
             else if (location_side > 0)
             {
-                // std::cout << "In location side ====> ";
-                std::string key = line.substr(0, line.find("="));
+                std::string key = ft_trim(line.substr(0, line.find("=")));
                 std::vector<std::string> value;
-                value.push_back(line.substr(line.find("=") + 1, line.size()));
-                std::cout << j << std::endl;
+                value.push_back(ft_trim(line.substr(line.find("=") + 1, line.size())));
                 if (j >= data.location.size()) {
                     data.location.resize(j+1);
                 }
                 data.location.at(j).push_back(std::make_pair(key, value));
-                // std::cout << key << std::endl;
-                // std::cout << std::endl;
             }
         }
         if (server_side > 0)
@@ -126,3 +126,26 @@ for (std::vector<server_data>::iterator it = wrapper.begin(); it != wrapper.end(
     }
 }
 }
+
+
+
+// typedef std::vector <server_data> serv_data;
+// typedef std::vector<std::pair<std::string, std::vector<std::string> > > s1;
+// typedef std::vector<std::vector<std::pair<std::string, std::vector<std::string> > > > l1;
+
+// void    Parser::ft_parse_data_step2()
+// {
+//     serv_data::iterator it;
+//     s1::iterator it_s1;
+//     l1::iterator it_l1;
+    
+//     for (it = wrapper.begin(); it != wrapper.end(); ++it)
+//     {
+//         for (it_s1 = it->server.begin(); it_s1 != it->server.end(); ++it_s1)
+//         {
+//             std::string key = ft_trim(it_s1->first);
+//             std::vector<std::string> values = it_s1->second;
+            
+//         }
+//     }
+// }
