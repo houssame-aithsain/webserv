@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:13 by gothmane          #+#    #+#             */
-/*   Updated: 2024/01/08 19:07:14 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/01/08 19:37:24 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,13 +27,58 @@ Parser &Parser::operator=(const Parser &pr)
     return (*this);
 }
 
-std::string ft_trim(const std::string& str)
+std::string ft_trim(const std::string& str, std::string trim)
 {
-    size_t first = str.find_first_not_of(" \"\t");
+    size_t first = str.find_first_not_of(trim);
     if (std::string::npos == first)
         return str;
-    size_t last = str.find_last_not_of(" \"\t");
+    size_t last = str.find_last_not_of(trim);
     return str.substr(first, (last - first + 1));
+}
+
+int ft_count_special_char(std::string line, char car)
+{
+    size_t i = 0;
+    int    counter = 0;
+
+    for (; i < line.size(); i++)
+    {
+        if (line[i] == car)
+            counter++;
+    }
+    return (counter);
+}
+
+bool ft_check_quotes_for_single_data(std::string value)
+{
+    int open_br = 0;
+    int close_br = 0;
+    
+    if (value == "")
+    {
+        std::cout << "No value found !\n";
+        return (false);
+    }
+    if (value.size() > 1)
+    {
+        if (ft_count_special_char(value, '\"') == 2 && ft_count_special_char(value, '\'') == 2)
+        {
+            if ((value[0] == '\"' && value[1] == '\'') || (value[0] == '\'' && value[1] == '\"'))
+                open_br = 1;
+            if (open_br == 1 && (value[value.size() - 1] == '\"' && value[value.size() - 1] == '\'') 
+                || (value[value.size() - 1] == '\'' && value[value.size() - 1] == '\"'))
+                close_br = 1;
+            if (open_br == 1 && close_br == 1)
+                return (true);
+        }
+        else 
+        
+
+    }
+    std::cout << value << std::endl;
+    std::cout << value[0] << " " << value[value.size()] << "\n";
+    std::cout << "Check your quotes please !\n";
+    return (false);
 }
 
 std::vector<std::string>  ft_split_the_multiple_data(std::string value)
@@ -64,8 +109,11 @@ std::vector<std::string>  ft_split_the_multiple_data(std::string value)
     else if (open_brackets == 0 && close_brackets == 0)
     {
         std::vector<std::string> v ;
-
-        v.push_back(value);
+        
+        if (ft_check_quotes_for_single_data(value))
+            v.push_back(value);
+        else
+            exit(1); // throw exception of brackets
         return (v);
     }
     
@@ -76,7 +124,7 @@ std::vector<std::string>  ft_split_the_multiple_data(std::string value)
     while (std::getline(ss, item, ','))
     {
         item = item.substr(1, item.size() - 2);
-        result.push_back(ft_trim(item));
+        result.push_back(ft_trim(item, " \"\t"));
     }
     // for (size_t i = 0; i < result.size(); i++)
     // {
@@ -99,7 +147,7 @@ void Parser::ft_read_nd_parse(std::string fileName)
     {
         while (std::getline(in, line))
         {
-            if (ft_trim(line) == "[[server]]")
+            if (ft_trim(line, " \"\t") == "[[server]]")
             {
                 if (server_side > 0)
                 {
@@ -112,7 +160,7 @@ void Parser::ft_read_nd_parse(std::string fileName)
                 j = -1;
                 continue;
             }
-            else if (ft_trim(line) == "[[server.location]]")
+            else if (ft_trim(line, " \"\t") == "[[server.location]]")
             {
                 server_id = server_side;
                 location_side++;
@@ -123,20 +171,20 @@ void Parser::ft_read_nd_parse(std::string fileName)
             {
                 if (line.find("=") == std::string::npos)
                     continue;
-                std::string key = ft_trim((line.substr(0, line.find("="))));
+                std::string key = ft_trim((line.substr(0, line.find("="))), " \"\t");
                 if (key == "")
                     continue;
                 std::vector<std::string> value;
-                value = ft_split_the_multiple_data(ft_trim(line.substr(line.find("=") + 1, line.size())));
+                value = ft_split_the_multiple_data(ft_trim(line.substr(line.find("=") + 1, line.size()), " \t"));
                 data.server.push_back(std::make_pair(key, value));
             }
             else if (location_side > 0)
             {
-                std::string key = ft_trim(line.substr(0, line.find("=")));
+                std::string key = ft_trim(line.substr(0, line.find("=")), " \"\t");
                 if (key == "")
                     continue;
                 std::vector<std::string> value;
-                value = ft_split_the_multiple_data(ft_trim(line.substr(line.find("=") + 1, line.size())));
+                value = ft_split_the_multiple_data(ft_trim(line.substr(line.find("=") + 1, line.size()), " \t"));
                 if (j >= data.location.size()) {
                     data.location.resize(j+1);
                 }
