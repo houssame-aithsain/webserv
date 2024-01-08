@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:13 by gothmane          #+#    #+#             */
-/*   Updated: 2024/01/08 18:21:22 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/01/08 19:07:14 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ std::vector<std::string>  ft_split_the_multiple_data(std::string value)
     std::stringstream ss(value);
     // check begin and end format
     size_t i = 0;
-    std::cout << "value = " << value[i] << std::endl;
     if (value[i] == '[' && value[i + 1] && value[i + 1] == '\"')
     {
         open_brackets = 1;
@@ -57,7 +56,6 @@ std::vector<std::string>  ft_split_the_multiple_data(std::string value)
         close_brackets = 1;
         close_dq = 1;
     }
-
     if ((open_brackets == 1 && open_dq != 1) || (close_brackets == 1 && close_dq != 1))
     {
         std::cout << "OB = " << open_brackets << " OD = " << open_dq << " CB = " << close_brackets << " close_dq = " << close_dq << "\n";
@@ -78,12 +76,12 @@ std::vector<std::string>  ft_split_the_multiple_data(std::string value)
     while (std::getline(ss, item, ','))
     {
         item = item.substr(1, item.size() - 2);
-        result.push_back(item);
+        result.push_back(ft_trim(item));
     }
-    for (size_t i = 0; i < result.size(); i++)
-    {
-        std::cout << result[i] << std::endl;
-    }
+    // for (size_t i = 0; i < result.size(); i++)
+    // {
+    //     std::cout << result[i] << std::endl;
+    // }
     return (result);
 }
 
@@ -101,7 +99,7 @@ void Parser::ft_read_nd_parse(std::string fileName)
     {
         while (std::getline(in, line))
         {
-            if (line == "[[server]]")
+            if (ft_trim(line) == "[[server]]")
             {
                 if (server_side > 0)
                 {
@@ -114,7 +112,7 @@ void Parser::ft_read_nd_parse(std::string fileName)
                 j = -1;
                 continue;
             }
-            else if (line == "	[[server.location]]")
+            else if (ft_trim(line) == "[[server.location]]")
             {
                 server_id = server_side;
                 location_side++;
@@ -123,7 +121,11 @@ void Parser::ft_read_nd_parse(std::string fileName)
             }
             if (server_id != server_side && location_side == 0)
             {
+                if (line.find("=") == std::string::npos)
+                    continue;
                 std::string key = ft_trim((line.substr(0, line.find("="))));
+                if (key == "")
+                    continue;
                 std::vector<std::string> value;
                 value = ft_split_the_multiple_data(ft_trim(line.substr(line.find("=") + 1, line.size())));
                 data.server.push_back(std::make_pair(key, value));
@@ -131,8 +133,10 @@ void Parser::ft_read_nd_parse(std::string fileName)
             else if (location_side > 0)
             {
                 std::string key = ft_trim(line.substr(0, line.find("=")));
+                if (key == "")
+                    continue;
                 std::vector<std::string> value;
-                value.push_back(ft_trim(line.substr(line.find("=") + 1, line.size())));
+                value = ft_split_the_multiple_data(ft_trim(line.substr(line.find("=") + 1, line.size())));
                 if (j >= data.location.size()) {
                     data.location.resize(j+1);
                 }

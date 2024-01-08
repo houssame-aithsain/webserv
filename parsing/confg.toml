@@ -1,5 +1,6 @@
 [[server]]
 port = "1337"
+asd
 host = "10.0.0.1"
 root = "www"
 server_name = ["example.com", "example2.com", "example3.com"]
@@ -50,6 +51,6 @@ upload_path = "www/upload"
 	root = "www"
 	index = ["index.html",  "index.htm"]
 	allowed_methods = ["GET", "DELETE"]
-	error_page = ["404 /404.html"]
+	error_page = ["404", "/404.html"]
 	autoindex = "on"
 	_clientMaxBodySize = "10m"
