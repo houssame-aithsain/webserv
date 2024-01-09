@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:13 by gothmane          #+#    #+#             */
-/*   Updated: 2024/01/08 19:37:24 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/01/09 15:18:50 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,15 +65,35 @@ bool ft_check_quotes_for_single_data(std::string value)
         {
             if ((value[0] == '\"' && value[1] == '\'') || (value[0] == '\'' && value[1] == '\"'))
                 open_br = 1;
-            if (open_br == 1 && (value[value.size() - 1] == '\"' && value[value.size() - 1] == '\'') 
-                || (value[value.size() - 1] == '\'' && value[value.size() - 1] == '\"'))
+            if (open_br == 1 && ((value[value.size() - 1] == '\"' && value[value.size() - 1] == '\'') 
+                || (value[value.size() - 1] == '\'' && value[value.size() - 1] == '\"')))
                 close_br = 1;
             if (open_br == 1 && close_br == 1)
                 return (true);
         }
-        else 
-        
-
+        else if (ft_count_special_char(value, '\"') == 2 && ft_count_special_char(value, '\'') == 0)
+        {
+            if (value[0] == '\"')
+                open_br = 1;
+            if (open_br == 1 && value[value.size() - 1] == '\"')
+                close_br = 1;
+            if (open_br == 1 && close_br == 1)
+                return (true);
+        }
+        else if (ft_count_special_char(value, '\"') == 0 && ft_count_special_char(value, '\'') == 2)
+        {
+            if (value[0] == '\'')
+                open_br = 1;
+            if (open_br == 1 && value[value.size() - 1] == '\'')
+                close_br = 1;
+            if (open_br == 1 && close_br == 1)
+                return (true);
+        }
+        else if (ft_count_special_char(value, '\"') == 0 && ft_count_special_char(value, '\'') == 0)
+            return (true);
+        else
+            std::cout << "Error in your quotes, respect the format\n";
+        // else 
     }
     std::cout << value << std::endl;
     std::cout << value[0] << " " << value[value.size()] << "\n";
@@ -110,7 +130,7 @@ std::vector<std::string>  ft_split_the_multiple_data(std::string value)
     {
         std::vector<std::string> v ;
         
-        if (ft_check_quotes_for_single_data(value))
+        if (value != "")
             v.push_back(value);
         else
             exit(1); // throw exception of brackets
@@ -149,6 +169,7 @@ void Parser::ft_read_nd_parse(std::string fileName)
         {
             if (ft_trim(line, " \"\t") == "[[server]]")
             {
+                std::cout << "SERRRRRVER \n";
                 if (server_side > 0)
                 {
                     wrapper.push_back(data);
@@ -176,6 +197,8 @@ void Parser::ft_read_nd_parse(std::string fileName)
                     continue;
                 std::vector<std::string> value;
                 value = ft_split_the_multiple_data(ft_trim(line.substr(line.find("=") + 1, line.size()), " \t"));
+                if (!ft_check_quotes_for_single_data(value.back()))
+                    exit(1);
                 data.server.push_back(std::make_pair(key, value));
             }
             else if (location_side > 0)
@@ -185,6 +208,8 @@ void Parser::ft_read_nd_parse(std::string fileName)
                     continue;
                 std::vector<std::string> value;
                 value = ft_split_the_multiple_data(ft_trim(line.substr(line.find("=") + 1, line.size()), " \t"));
+                if (!ft_check_quotes_for_single_data(value.back()))
+                    exit(1);
                 if (j >= data.location.size()) {
                     data.location.resize(j+1);
                 }
