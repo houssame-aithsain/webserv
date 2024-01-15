@@ -71,7 +71,7 @@ bool ft_check_quotes_for_single_data(std::string value)
             if (open_br == 1 && close_br == 1)
                 return (true);
         }
-        else if (ft_count_special_char(value, '\"') == 2 && ft_count_special_char(value, '\'') == 0)
+        else if (ft_count_special_char(value, '\"') == 2 && ft_count_special_char(value, '\'') >= 0)
         {
             if (value[0] == '\"')
                 open_br = 1;
@@ -80,7 +80,7 @@ bool ft_check_quotes_for_single_data(std::string value)
             if (open_br == 1 && close_br == 1)
                 return (true);
         }
-        else if (ft_count_special_char(value, '\"') == 0 && ft_count_special_char(value, '\'') == 2)
+        else if (ft_count_special_char(value, '\"') >= 0 && ft_count_special_char(value, '\'') == 2)
         {
             if (value[0] == '\'')
                 open_br = 1;
@@ -222,38 +222,41 @@ void Parser::ft_read_nd_parse(std::string fileName)
 
     // Printing
 std::size_t r = 1;
-for (std::vector<server_data>::iterator it = wrapper.begin(); it != wrapper.end(); ++it, ++r) {
+for (std::vector<server_data>::iterator it = wrapper.begin(); it != wrapper.end(); ++it, ++r)
+{
     std::cout << "Server data " << i << ":\n";
-    
+
     std::cout << "#Server:\n";
     std::size_t j = 1;
-    for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator jt = it->server.begin(); jt != it->server.end(); ++jt, ++j) {
+    for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator jt = it->server.begin(); jt != it->server.end(); ++jt, ++j)
+    {
         std::string key = jt->first;
         std::vector<std::string> values = jt->second;
 
-        std::cout << "Key: " << key << ", Values: ";
-        for (std::size_t k = 0; k < values.size(); ++k) {
-            std::cout << values[k] << " ";
-        }
-        std::cout << std::endl;
+        if (key == "port")
+            std::cout << "Port: " << ft_trim(values[0], "\'\"") << std::endl;
+        // std::cout << "Key: " << key << ", Values: ";
+        // for (std::size_t k = 0; k < values.size(); ++k) {
+        //     std::cout << values[k] << " ";
+        // }
     }
 
-    std::cout << "#Location:\n";
-    std::size_t k = 1;
-    for (std::vector<std::vector<std::pair<std::string, std::vector<std::string> > > >::iterator kt = it->location.begin(); kt != it->location.end(); ++kt, ++k) {
-        std::cout << "Location Number : " << k << std::endl;
-        std::size_t l = 1;
-        for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator lt = kt->begin(); lt != kt->end(); ++lt, ++l) {
-            std::string key = lt->first;
-            std::vector<std::string> values = lt->second;
+    // std::cout << "#Location:\n";
+    // std::size_t k = 1;
+    // for (std::vector<std::vector<std::pair<std::string, std::vector<std::string> > > >::iterator kt = it->location.begin(); kt != it->location.end(); ++kt, ++k) {
+    //     std::cout << "Location Number : " << k << std::endl;
+    //     std::size_t l = 1;
+    //     for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator lt = kt->begin(); lt != kt->end(); ++lt, ++l) {
+    //         std::string key = lt->first;
+    //         std::vector<std::string> values = lt->second;
 
-            std::cout << "Key: " << key << ", Values: ";
-            for (std::size_t m = 0; m < values.size(); ++m) {
-                std::cout << values[m] << " ";
-            }
-            std::cout << std::endl;
-        }
-    }
+    //         std::cout << "Key: " << key << ", Values: ";
+    //         for (std::size_t m = 0; m < values.size(); ++m) {
+    //             std::cout << values[m] << " ";
+    //         }
+    //         std::cout << std::endl;
+    //     }
+    // }
 }
 }
 
