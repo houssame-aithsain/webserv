@@ -65,8 +65,8 @@ bool ft_check_quotes_for_single_data(std::string value)
         {
             if ((value[0] == '\"' && value[1] == '\'') || (value[0] == '\'' && value[1] == '\"'))
                 open_br = 1;
-            if (open_br == 1 && ((value[value.size() - 1] == '\"' && value[value.size() - 1] == '\'') 
-                || (value[value.size() - 1] == '\'' && value[value.size() - 1] == '\"')))
+            if (open_br == 1 && ((value[value.size() - 1] == '\"' && value[value.size() - 2] == '\'') 
+                || (value[value.size() - 1] == '\'' && value[value.size() - 2] == '\"')))
                 close_br = 1;
             if (open_br == 1 && close_br == 1)
                 return (true);
