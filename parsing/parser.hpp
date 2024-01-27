@@ -37,7 +37,9 @@ class Parser
         // std::vector<std::pair<std::string, std::vector<std::string> > > getServer();
         // void setServer(const std::vector<std::pair<std::string, std::vector<std::string> > > &server);
 
-        void ft_read_nd_parse(std::string fileName);
+        void    ft_read_nd_parse(std::string fileName);
         void    ft_parse_data_step2();
+        void    ft_print_data();
+
 
 };

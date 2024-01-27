@@ -93,7 +93,6 @@ bool ft_check_quotes_for_single_data(std::string value)
             return (true);
         else
             std::cout << "Error in your quotes, respect the format\n";
-        // else 
     }
     std::cout << value << std::endl;
     std::cout << value[0] << " " << value[value.size()] << "\n";
@@ -146,12 +145,54 @@ std::vector<std::string>  ft_split_the_multiple_data(std::string value)
         item = item.substr(1, item.size() - 2);
         result.push_back(ft_trim(item, " \"\t"));
     }
-    // for (size_t i = 0; i < result.size(); i++)
-    // {
-    //     std::cout << result[i] << std::endl;
-    // }
     return (result);
 }
+
+void Parser::ft_print_data()
+{
+    // Printing
+    std::size_t r = 1;
+    for (std::vector<server_data>::iterator it = wrapper.begin(); it != wrapper.end(); ++it, ++r)
+    {
+        std::cout << "Server data " << r << ":\n";
+
+        std::cout << "\n\n\n#Server:\n";
+        std::size_t j = 1;
+        for (std::vector<std::pair<std::string, std::vector<std::string>>>::iterator jt = it->server.begin(); jt != it->server.end(); ++jt, ++j)
+        {
+            std::string key = jt->first;
+            std::vector<std::string> values = jt->second;
+
+            if (key == "port")
+                std::cout << "Port: " << ft_trim(values[0], "\'\"") << std::endl;
+            // std::cout << "Key: " << key << ", Values: ";
+            // for (std::size_t k = 0; k < values.size(); ++k) {
+            //     std::cout << values[k] << " ";
+            // }
+        }
+
+        std::cout << "\n\n\n#Location:\n";
+        std::size_t k = 1;
+        for (std::vector<std::vector<std::pair<std::string, std::vector<std::string>>>>::iterator kt = it->location.begin(); kt != it->location.end(); ++kt, ++k)
+        {
+            std::cout << "Location Number : " << k << std::endl;
+            std::size_t l = 1;
+            for (std::vector<std::pair<std::string, std::vector<std::string>>>::iterator lt = kt->begin(); lt != kt->end(); ++lt, ++l)
+            {
+                std::string key = lt->first;
+                std::vector<std::string> values = lt->second;
+
+                std::cout << "Key: " << key << ", Values: ";
+                for (std::size_t m = 0; m < values.size(); ++m)
+                {
+                    std::cout << values[m] << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
+    }
+}
+
 
 void Parser::ft_read_nd_parse(std::string fileName)
 {
@@ -220,44 +261,7 @@ void Parser::ft_read_nd_parse(std::string fileName)
             wrapper.push_back(data);
     }
 
-    // Printing
-std::size_t r = 1;
-for (std::vector<server_data>::iterator it = wrapper.begin(); it != wrapper.end(); ++it, ++r)
-{
-    std::cout << "Server data " << i << ":\n";
-
-    std::cout << "#Server:\n";
-    std::size_t j = 1;
-    for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator jt = it->server.begin(); jt != it->server.end(); ++jt, ++j)
-    {
-        std::string key = jt->first;
-        std::vector<std::string> values = jt->second;
-
-        if (key == "port")
-            std::cout << "Port: " << ft_trim(values[0], "\'\"") << std::endl;
-        // std::cout << "Key: " << key << ", Values: ";
-        // for (std::size_t k = 0; k < values.size(); ++k) {
-        //     std::cout << values[k] << " ";
-        // }
-    }
-
-    // std::cout << "#Location:\n";
-    // std::size_t k = 1;
-    // for (std::vector<std::vector<std::pair<std::string, std::vector<std::string> > > >::iterator kt = it->location.begin(); kt != it->location.end(); ++kt, ++k) {
-    //     std::cout << "Location Number : " << k << std::endl;
-    //     std::size_t l = 1;
-    //     for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator lt = kt->begin(); lt != kt->end(); ++lt, ++l) {
-    //         std::string key = lt->first;
-    //         std::vector<std::string> values = lt->second;
-
-    //         std::cout << "Key: " << key << ", Values: ";
-    //         for (std::size_t m = 0; m < values.size(); ++m) {
-    //             std::cout << values[m] << " ";
-    //         }
-    //         std::cout << std::endl;
-    //     }
-    // }
-}
+    ft_print_data();
 }
 
 
