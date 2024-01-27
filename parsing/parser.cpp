@@ -164,7 +164,10 @@ void Parser::ft_print_data()
             std::vector<std::string> values = jt->second;
 
             if (key == "port")
+            {
+                this->port = std::atoi(ft_trim(values[0], "\'\"").c_str());
                 std::cout << "Port: " << ft_trim(values[0], "\'\"") << std::endl;
+            }
             // std::cout << "Key: " << key << ", Values: ";
             // for (std::size_t k = 0; k < values.size(); ++k) {
             //     std::cout << values[k] << " ";

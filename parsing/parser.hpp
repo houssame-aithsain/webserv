@@ -28,6 +28,7 @@ class Parser
 {
     private:
         std::vector <server_data> wrapper;
+        int     port;
         server_data data;
    public:
         Parser();
@@ -36,7 +37,15 @@ class Parser
         ~Parser();
         // std::vector<std::pair<std::string, std::vector<std::string> > > getServer();
         // void setServer(const std::vector<std::pair<std::string, std::vector<std::string> > > &server);
+                // Getter pour port
+        int getPort() const {
+            return port;
+        }
 
+        // Setter pour port
+        void setPort(int p) {
+            port = p;
+        }
         void    ft_read_nd_parse(std::string fileName);
         void    ft_parse_data_step2();
         void    ft_print_data();

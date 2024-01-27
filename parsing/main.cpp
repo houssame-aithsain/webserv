@@ -17,5 +17,5 @@ int main()
     Parser p;
 
     p.ft_read_nd_parse("confg.toml");
-    
+    std::cout << "PORT IN HERE BRO: " << p.getPort() << "\n";
 }
