@@ -1,0 +1,17 @@
+[[server]]
+	port = "1336"
+	host = "10.0.0.1"
+	root = "www"
+	server_name = ["example1.com", "example22.com", "example3.com"]
+	index = ["index.html", "index.htm"]
+	error_page = ["404", "www/error_pages/404.html"]
+	_clientMaxBodySize = "100m"
+	upload_path = "www/upload"
+		[[server.location]]
+		prefix = "/html"
+		root = "www"
+		index = ["index.html",  "index.htm"]
+		allowed_methods = ["GET", "DELETE"]
+		error_page = ["502", "/404.html"]
+		autoindex = "on"
+		_clientMaxBodySize = "10m"
