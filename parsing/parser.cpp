@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:13 by gothmane          #+#    #+#             */
-/*   Updated: 2024/01/09 15:18:50 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/01/29 22:29:07 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,12 @@ Parser::~Parser() {}
 
 Parser::Parser(const Parser &p)
 {
+    (void) p;
 }
 
 Parser &Parser::operator=(const Parser &pr)
 {
+    (void) pr;
     // if (this != &pr)
     //     this->server = pr.server;
     return (*this);
@@ -158,7 +160,7 @@ void Parser::ft_print_data()
 
         std::cout << "\n\n\n#Server:\n";
         std::size_t j = 1;
-        for (std::vector<std::pair<std::string, std::vector<std::string>>>::iterator jt = it->server.begin(); jt != it->server.end(); ++jt, ++j)
+        for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator jt = it->server.begin(); jt != it->server.end(); ++jt, ++j)
         {
             std::string key = jt->first;
             std::vector<std::string> values = jt->second;
@@ -176,11 +178,11 @@ void Parser::ft_print_data()
 
         std::cout << "\n\n\n#Location:\n";
         std::size_t k = 1;
-        for (std::vector<std::vector<std::pair<std::string, std::vector<std::string>>>>::iterator kt = it->location.begin(); kt != it->location.end(); ++kt, ++k)
+        for (std::vector<std::vector<std::pair<std::string, std::vector<std::string> > > >::iterator kt = it->location.begin(); kt != it->location.end(); ++kt, ++k)
         {
             std::cout << "Location Number : " << k << std::endl;
             std::size_t l = 1;
-            for (std::vector<std::pair<std::string, std::vector<std::string>>>::iterator lt = kt->begin(); lt != kt->end(); ++lt, ++l)
+            for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator lt = kt->begin(); lt != kt->end(); ++lt, ++l)
             {
                 std::string key = lt->first;
                 std::vector<std::string> values = lt->second;
@@ -204,8 +206,8 @@ void Parser::ft_read_nd_parse(std::string fileName)
     int server_side = 0;
     int location_side = 0;
     int server_id = 0;
-    int i = 0;
-    int j = -1;
+    // int i = 0;
+    size_t j = -1;
 
     if (in.is_open())
     {
@@ -237,6 +239,7 @@ void Parser::ft_read_nd_parse(std::string fileName)
                 if (line.find("=") == std::string::npos)
                     continue;
                 std::string key = ft_trim((line.substr(0, line.find("="))), " \"\t");
+                std::cout << "key = " << key << std::endl;
                 if (key == "")
                     continue;
                 std::vector<std::string> value;
@@ -263,11 +266,13 @@ void Parser::ft_read_nd_parse(std::string fileName)
         if (server_side > 0)
             wrapper.push_back(data);
     }
+    else
+        std::cout << "Unable to open file\n";
 
-    ft_print_data();
+    // ft_print_data();
 }
 
-
+std::vector<server_data> Parser::getWrapper( void ) {return (wrapper);}
 
 // typedef std::vector <server_data> serv_data;
 // typedef std::vector<std::pair<std::string, std::vector<std::string> > > s1;
