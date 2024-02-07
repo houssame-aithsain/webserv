@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/01/29 20:39:35 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/05 05:10:08 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "../parsing/parser.hpp"
+#include <csignal>
+#include <sys/event.h>
 
 #define ZERO 0
 #define ONE 1
@@ -29,4 +31,6 @@ class Server : public Parser {
         // server( const server & other );
         // server operator=(const server & other);
         void initializeSocket(  std::vector <server_data> serverData );
+        void handleHttpRequest(int clientSocket, char* httpRequest);
+        void handleConnection(int clientSocket);
 };
