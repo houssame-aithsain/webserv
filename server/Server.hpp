@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/05 05:10:08 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/09 07:41:42 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,11 @@
 #include "../parsing/parser.hpp"
 #include <csignal>
 #include <sys/event.h>
+#include <limits.h>
 
 #define ZERO 0
 #define ONE 1
+#define FAILED -1
 
 #define SOCKETFAILED "Error binding socket!"
 
