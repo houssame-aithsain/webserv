@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/09 07:41:42 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/10 02:10:55 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <csignal>
 #include <sys/event.h>
 #include <limits.h>
+#include <iterator>
 
 #define ZERO 0
 #define ONE 1

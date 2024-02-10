@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/09 08:11:38 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/10 03:36:09 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 #include <fstream>
 #include <sstream>
 
-int clientSocket;
 int sockFD;
+int clientSocket;
 char buffer[1024];
 
 void handelSignal(int signum) {
@@ -81,10 +81,11 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
 
     int kq;
     int eventNumb;
+    int requestByteSize;
     struct kevent event;
     struct kevent events[64];
     sockaddr_in socketAddress;
-    std::string sockPort = trim(serverData[0].server[0].second[0], "\"");
+    std::string sockPort = trim(serverData[ZERO].server[ZERO].second[ZERO], "\"");
     int sockFD = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     socketAddress.sin_family = AF_INET;
@@ -94,11 +95,6 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
         std::cout << "failed to bind server socket" << std::endl;
         close(sockFD);
         exit(10);
-    }
-    if (listen(sockFD, 10) == FAILED) {
-        std::cout << "failed to make the socket at the listen mode!" << std::endl;
-        close(sockFD);
-        exit(11);
     }
     if ((kq = kqueue()) == FAILED) {
         std::cout << "failed to create a kernel event queue" << std::endl;
@@ -113,23 +109,31 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
         close(kq);
         exit(18);
     }
+    if (listen(sockFD, 10) == FAILED) {
+        std::cout << "failed to make the socket at the listen mode!" << std::endl;
+        close(sockFD);
+        exit(11);
+    }
     std::cout << "server now is listening in port " << sockPort << std::endl;
     signal(SIGINT, handelSignal);
     while (true) {
-        eventNumb =  kevent(kq, nullptr, 0, events, 64, nullptr);
+        eventNumb = kevent(kq, nullptr, 0, events, 64, nullptr);
         for (int i = ZERO; i < eventNumb; i++) {
             if (events[i].ident == (uintptr_t)sockFD) {
                 if ((clientSocket = accept(sockFD, nullptr, nullptr)) == FAILED) {
-                    std::cout << "error: connection failed" << std::endl;
+                    std::cout << "{=====> error: connection failed <=====}" << std::endl;
                     continue;
                 } else
                     std::cout << "connection has been done successfully" << std::endl;
-                recv(clientSocket, buffer, sizeof(buffer), 0);
+                clientSocksCollector.push_back(clientSocket);
+                requestByteSize = recv(clientSocket, buffer, sizeof(buffer), 0);
+                buffer[requestByteSize] = ZERO;
+                std::cout << buffer << std::endl;
                 handleHttpRequest(clientSocket, buffer);
+                close(clientSocket);
             }
         }
-        close(clientSocket);
     }
     close(sockFD);
 }
-    
+
