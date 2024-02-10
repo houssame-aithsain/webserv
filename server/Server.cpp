@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/10 03:36:09 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/10 03:39:58 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,6 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
                     continue;
                 } else
                     std::cout << "connection has been done successfully" << std::endl;
-                clientSocksCollector.push_back(clientSocket);
                 requestByteSize = recv(clientSocket, buffer, sizeof(buffer), 0);
                 buffer[requestByteSize] = ZERO;
                 std::cout << buffer << std::endl;
