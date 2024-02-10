@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:13 by gothmane          #+#    #+#             */
-/*   Updated: 2024/01/29 22:29:07 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/10 18:40:21 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ Parser &Parser::operator=(const Parser &pr)
     return (*this);
 }
 
-std::string ft_trim(const std::string& str, std::string trim)
+std::string Parser::ft_trim(const std::string& str, std::string trim)
 {
     size_t first = str.find_first_not_of(trim);
     if (std::string::npos == first)
@@ -102,7 +102,7 @@ bool ft_check_quotes_for_single_data(std::string value)
     return (false);
 }
 
-std::vector<std::string>  ft_split_the_multiple_data(std::string value)
+std::vector<std::string>  Parser::ft_split_the_multiple_data(std::string value)
 {
     int open_brackets = 0;
     int close_brackets = 0;

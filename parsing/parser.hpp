@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:15 by gothmane          #+#    #+#             */
-/*   Updated: 2024/01/29 22:08:32 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/10 18:40:29 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,4 +50,6 @@ class Parser
         void    ft_parse_data_step2();
         void    ft_print_data();
         std::vector<server_data> getWrapper( void );
+        std::string ft_trim(const std::string& str, std::string trim);
+        std::vector<std::string>  ft_split_the_multiple_data(std::string value);
 };

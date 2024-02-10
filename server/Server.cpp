@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/10 03:39:58 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/10 20:12:09 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,21 @@ std::string trim(const std::string& str, const std::string& charsToTrim) {
     return str.substr(start, end - start + 1);
 }
 
+// std::vector<std::pair<std::string, std::vector<std::string> > > request_data;
+
 void Server::handleHttpRequest(int clientSocket, char* httpRequest) {
+
+    std::cout << "######################################################\n";
+    for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator it = request_data.begin(); it != request_data.end(); ++it)
+    {
+        std::cout << "Key: " << it->first << ", Values: ";
+        for (std::vector<std::string>::iterator vecIt = it->second.begin(); vecIt != it->second.end(); ++vecIt)
+        {
+            std::cout << *vecIt << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << "######################################################\n\n";
     if (strncmp(httpRequest, "GET ", 4) == 0) {
         std::string requestedResource = "index.html";
 
@@ -90,7 +104,7 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
 
     socketAddress.sin_family = AF_INET;
     socketAddress.sin_addr.s_addr = INADDR_ANY;
-    socketAddress.sin_port = htons(std::atoi(sockPort.c_str()));
+    socketAddress.sin_port = htons(std::atoi(sockPort.c_str())); 
     if (bind(sockFD, reinterpret_cast<struct sockaddr *>(&socketAddress), sizeof(socketAddress)) == FAILED) {
         std::cout << "failed to bind server socket" << std::endl;
         close(sockFD);
@@ -127,12 +141,66 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
                     std::cout << "connection has been done successfully" << std::endl;
                 requestByteSize = recv(clientSocket, buffer, sizeof(buffer), 0);
                 buffer[requestByteSize] = ZERO;
-                std::cout << buffer << std::endl;
+                // std::cout << buffer << std::endl;
+                // std::cout << "-------------------------------------" << std::endl;
+                ft_parse_request(buffer);
                 handleHttpRequest(clientSocket, buffer);
                 close(clientSocket);
             }
         }
-    }
+    }//set socket options to fix failed to bind server
     close(sockFD);
 }
+#include <utility> // for std::pair
 
+
+
+void Server::ft_parse_request(std::string request) {
+    std::istringstream getrequestStream(request);
+    std::string getrequestLine;
+    int index = 0;
+    while (std::getline(getrequestStream, getrequestLine)) 
+    {
+        if (index == 0)
+        {
+            //get method
+            std::vector<std::string>  new_v;
+            int next = getrequestLine.find(" ");
+            new_v.push_back(getrequestLine.substr(0, next));
+            this->request_data.push_back(std::make_pair("Method", new_v));
+
+            //get assets
+            new_v.clear();
+            int new_next = getrequestLine.find(" " , next + 1);
+            new_v.push_back(getrequestLine.substr((next + 1), (new_next - (next + 1))));
+            this->request_data.push_back(std::make_pair("Asset", new_v));
+
+            //get type
+            new_v.clear();
+            new_v.push_back(getrequestLine.substr(new_next + 1, ((getrequestLine.size() - 2) - new_next)));
+            this->request_data.push_back(std::make_pair("Type", new_v));
+            index++;
+            // request_data[0].first = "Method";
+            // request_data[1].second[0] = getrequestLine.substr(0, getrequestLine.find(" "));
+        }
+        else
+        {
+            int i1 = getrequestLine.find(":");
+            std::string key = getrequestLine.substr(0, i1);
+            std::string value = getrequestLine.substr((i1 + 1), ((getrequestLine.size() - 2) - i1));
+
+            if (key != "")
+            {
+                std::vector<std::string>  new_v;
+
+                new_v.push_back(ft_trim(value, " \t\n\""));
+                this->request_data.push_back(std::make_pair(key, new_v));
+            }
+            // std::cout << "The key => " << key << std::endl;
+            // std::cout << "The value => " << value << std::endl;
+        }
+        // std::cout << getrequestLine << std::endl;
+    }
+
+
+}

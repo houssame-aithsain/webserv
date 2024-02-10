@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/10 02:10:55 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/10 17:14:13 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@
 
 class Server : public Parser {
     public:
+        std::vector<std::pair<std::string, std::vector<std::string> > > request_data;
         // ~server( void );
         // server( void );
         // server( const server & other );
@@ -36,4 +37,5 @@ class Server : public Parser {
         void initializeSocket(  std::vector <server_data> serverData );
         void handleHttpRequest(int clientSocket, char* httpRequest);
         void handleConnection(int clientSocket);
+        void ft_parse_request(std::string buffer);
 };
