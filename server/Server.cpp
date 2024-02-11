@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/10 20:12:09 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/02/11 03:41:13 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,14 +97,14 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
     int eventNumb;
     int requestByteSize;
     struct kevent event;
-    struct kevent events[64];
+    struct kevent Revent;
     sockaddr_in socketAddress;
     std::string sockPort = trim(serverData[ZERO].server[ZERO].second[ZERO], "\"");
     int sockFD = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     socketAddress.sin_family = AF_INET;
     socketAddress.sin_addr.s_addr = INADDR_ANY;
-    socketAddress.sin_port = htons(std::atoi(sockPort.c_str())); 
+    socketAddress.sin_port = htons(std::atoi(sockPort.c_str()));
     if (bind(sockFD, reinterpret_cast<struct sockaddr *>(&socketAddress), sizeof(socketAddress)) == FAILED) {
         std::cout << "failed to bind server socket" << std::endl;
         close(sockFD);
@@ -116,8 +116,8 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
         close(kq);
         exit(14);
     }
-    EV_SET(&event, sockFD,EVFILT_READ, EV_ADD , 0, 0, nullptr);
-    if (kevent(kq, &event, 1, nullptr, 0, nullptr)) {
+    EV_SET(&event, sockFD, EVFILT_READ, EV_ADD , ZERO, ZERO, nullptr);
+    if (kevent(kq, &event, ONE, nullptr, ZERO, nullptr)) {
         std::cout << "failed to associat event with kernel event queue!" << std::endl;
         close(sockFD);
         close(kq);
@@ -131,29 +131,28 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
     std::cout << "server now is listening in port " << sockPort << std::endl;
     signal(SIGINT, handelSignal);
     while (true) {
-        eventNumb = kevent(kq, nullptr, 0, events, 64, nullptr);
+        eventNumb = kevent(kq, nullptr, ZERO, &Revent, ONE, nullptr);
         for (int i = ZERO; i < eventNumb; i++) {
-            if (events[i].ident == (uintptr_t)sockFD) {
+            if (Revent.ident == (uintptr_t)sockFD) {
                 if ((clientSocket = accept(sockFD, nullptr, nullptr)) == FAILED) {
                     std::cout << "{=====> error: connection failed <=====}" << std::endl;
                     continue;
                 } else
                     std::cout << "connection has been done successfully" << std::endl;
-                requestByteSize = recv(clientSocket, buffer, sizeof(buffer), 0);
+                requestByteSize = recv(clientSocket, buffer, sizeof(buffer), ZERO);
+                if (requestByteSize <= ZERO)
+                    break;
                 buffer[requestByteSize] = ZERO;
-                // std::cout << buffer << std::endl;
-                // std::cout << "-------------------------------------" << std::endl;
-                ft_parse_request(buffer);
+                std::cout << buffer << std::endl;
                 handleHttpRequest(clientSocket, buffer);
-                close(clientSocket);
             }
         }
-    }//set socket options to fix failed to bind server
+        close(clientSocket);
+    }
     close(sockFD);
 }
+
 #include <utility> // for std::pair
-
-
 
 void Server::ft_parse_request(std::string request) {
     std::istringstream getrequestStream(request);
