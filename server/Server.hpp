@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/11 19:26:19 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/02/11 20:57:36 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,6 @@
 
 class Server : public Parser , public Response  {
     public:
-        std::map<std::string, std::string> request_data;
         // ~server( void );
         // server( void );
         // server( const server & other );
@@ -40,5 +39,4 @@ class Server : public Parser , public Response  {
         void initializeSocket(  std::vector <server_data> serverData );
         void handleHttpRequest(int clientSocket, char* httpRequest);
         void handleConnection(int clientSocket);
-        void ft_parse_request(std::string buffer);
 };
