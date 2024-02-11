@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/11 03:41:13 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/11 20:16:33 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,56 +39,58 @@ std::string trim(const std::string& str, const std::string& charsToTrim) {
 
 // std::vector<std::pair<std::string, std::vector<std::string> > > request_data;
 
-void Server::handleHttpRequest(int clientSocket, char* httpRequest) {
-
+void Server::handleHttpRequest(int clientSocket, char* httpRequest) 
+{
+    (void) httpRequest;
     std::cout << "######################################################\n";
-    for (std::vector<std::pair<std::string, std::vector<std::string> > >::iterator it = request_data.begin(); it != request_data.end(); ++it)
+    // std::vector<std::string> requestDataParsed = it->second;
+    if (request_data["Method"] == "GET") 
     {
-        std::cout << "Key: " << it->first << ", Values: ";
-        for (std::vector<std::string>::iterator vecIt = it->second.begin(); vecIt != it->second.end(); ++vecIt)
-        {
-            std::cout << *vecIt << " ";
-        }
+    // std::cout << ft_getPageToRender(request_data) << std::endl;
+    std::cout << "Test || "<< request_data["Asset"];
+    std::string requestedResource = request_data["Asset"];
+    if (requestedResource == "/")
+        requestedResource = "/index.html";
+    std::ifstream file("."+requestedResource, std::ios::binary);
+    if (!file.is_open()) {
+        // File not found, respond with a 404 error
+        std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
+        send(clientSocket, response.c_str(), response.length(), 0);
+    } else {
+        // Read the entire content of the file into a string        
+        std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        // fseek(fileStream, 0, SEEK_END);
+        // long fileSize = ftell(fileStream);
+        // fseek(fileStream, 0, SEEK_SET);
+        // // Allocate a buffer to hold the file content
+        // char* fileContent = new char[fileSize + 1];
+        // // Read the file content into the buffer
+        // fread(fileContent, 1, fileSize, fileStream);
+        // fclose(fileStream);
+        // Null-terminate the buffer
+        // fileContent[fileSize] = '\0';
+        std::string content_type = "text/html";
+        std::string ext = requestedResource.substr(requestedResource.find_last_of(".") + 1);
+        if (ext == "css")
+            content_type = "text/css";
+        else if (ext == "png")
+            content_type = "image/png";
+        else if (ext == "jpg")
+            content_type = "image/jpeg";
+        // Build the HTTP response
+        std::string httpResponse = "HTTP/1.1 200 OK\r\n";
+        httpResponse += "Content-Type: "+content_type+"\r\n";
+        httpResponse += "Content-Length: " + std::to_string(content.size()) + "\r\n";
+        httpResponse += "\r\n" + content;
+        // Send the HTTP response
+        send(clientSocket, httpResponse.c_str(), httpResponse.length(), 0);
+        // Clean up
+        file.close();
+    }
         std::cout << std::endl;
     }
     std::cout << "######################################################\n\n";
-    if (strncmp(httpRequest, "GET ", 4) == 0) {
-        std::string requestedResource = "index.html";
 
-        FILE* fileStream = fopen(requestedResource.c_str(), "r");
-        if (!fileStream) {
-            // File not found, respond with a 404 error
-            std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
-            send(clientSocket, response.c_str(), response.length(), 0);
-        } else {
-            // Read the file content
-            fseek(fileStream, 0, SEEK_END);
-            long fileSize = ftell(fileStream);
-            fseek(fileStream, 0, SEEK_SET);
-
-            // Allocate a buffer to hold the file content
-            char* fileContent = new char[fileSize + 1];
-
-            // Read the file content into the buffer
-            fread(fileContent, 1, fileSize, fileStream);
-            fclose(fileStream);
-
-            // Null-terminate the buffer
-            fileContent[fileSize] = '\0';
-
-            // Build the HTTP response
-            std::string httpResponse = "HTTP/1.1 200 OK\r\n";
-            httpResponse += "Content-Type: text/html\r\n";
-            httpResponse += "Content-Length: " + std::to_string(fileSize) + "\r\n";
-            httpResponse += "\r\n" + std::string(fileContent);
-
-            // Send the HTTP response
-            send(clientSocket, httpResponse.c_str(), httpResponse.length(), 0);
-
-            // Clean up
-            delete[] fileContent;
-        }
-    }
 }
 
 void Server::initializeSocket(std::vector<server_data> serverData) {
@@ -143,7 +145,9 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
                 if (requestByteSize <= ZERO)
                     break;
                 buffer[requestByteSize] = ZERO;
-                std::cout << buffer << std::endl;
+                // std::cout << buffer << std::endl;
+                // Hadi ra dyali la bghiti hyedha
+                ft_parse_request(buffer);
                 handleHttpRequest(clientSocket, buffer);
             }
         }
@@ -166,18 +170,18 @@ void Server::ft_parse_request(std::string request) {
             std::vector<std::string>  new_v;
             int next = getrequestLine.find(" ");
             new_v.push_back(getrequestLine.substr(0, next));
-            this->request_data.push_back(std::make_pair("Method", new_v));
+            this->request_data["Method"] = new_v[0];
 
             //get assets
             new_v.clear();
             int new_next = getrequestLine.find(" " , next + 1);
             new_v.push_back(getrequestLine.substr((next + 1), (new_next - (next + 1))));
-            this->request_data.push_back(std::make_pair("Asset", new_v));
-
+            this->request_data["Asset"] = new_v[0];
+            std::cout << this->request_data["Asset"] << std::endl;
             //get type
             new_v.clear();
             new_v.push_back(getrequestLine.substr(new_next + 1, ((getrequestLine.size() - 2) - new_next)));
-            this->request_data.push_back(std::make_pair("Type", new_v));
+            this->request_data["Type"] = new_v[0];
             index++;
             // request_data[0].first = "Method";
             // request_data[1].second[0] = getrequestLine.substr(0, getrequestLine.find(" "));
@@ -193,7 +197,7 @@ void Server::ft_parse_request(std::string request) {
                 std::vector<std::string>  new_v;
 
                 new_v.push_back(ft_trim(value, " \t\n\""));
-                this->request_data.push_back(std::make_pair(key, new_v));
+                this->request_data[key] = new_v[0];
             }
             // std::cout << "The key => " << key << std::endl;
             // std::cout << "The value => " << value << std::endl;
