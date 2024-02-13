@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/13 14:47:57 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/13 17:54:35 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,27 @@
 
 int sockFD;
 std::vector<pollfd> clientsSocket;
-char buffer[1024];
+std::string buffer;
+
+const int CHUNK_SIZE = 1024;
+
+int receiveData(int socket) {
+    buffer.clear();  // Clear the buffer
+    int dataSize = 0;
+    while (true) {
+        char chunk[CHUNK_SIZE];
+        int bytesRead = recv(socket, chunk, sizeof(chunk), ZERO);
+        if (bytesRead <= 0) {
+            // Either an error or end of data
+            break;
+        }
+
+        // Append the received chunk to the buffer
+        buffer += chunk;
+        dataSize += bytesRead;
+    }
+    return (dataSize);
+}
 
 void handelSignal(int signum) {
     // Properly handle signal, close sockets, and exit
@@ -42,7 +62,7 @@ std::string trim(const std::string& str, const std::string& charsToTrim) {
 
 // std::vector<std::pair<std::string, std::vector<std::string> > > request_data;
 
-void Server::handleHttpRequest(int clientSocket, char* httpRequest) {
+void Server::handleHttpRequest(int clientSocket, const char* httpRequest) {
     (void)httpRequest;
     std::cout << "######################################################\n";
 
@@ -81,7 +101,6 @@ void Server::handleHttpRequest(int clientSocket, char* httpRequest) {
 
             while (totalBytesSent < httpResponse.length()) {
                 ssize_t bytesSent = send(clientSocket, httpResponse.c_str() + totalBytesSent, remainingBytes, 0);
-
                 if (bytesSent == -1) {
                     if (errno == EAGAIN || errno == EWOULDBLOCK) {
                         // Output buffer is full, continue with other tasks
@@ -95,13 +114,11 @@ void Server::handleHttpRequest(int clientSocket, char* httpRequest) {
                         break;
                     }
                 }
-
                 totalBytesSent += static_cast<size_t>(bytesSent);
                 remainingBytes -= static_cast<size_t>(bytesSent);
             }
         }
     }
-
     std::cout << "######################################################\n\n";
     close(clientSocket);
 }
@@ -161,19 +178,19 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
     clientsSocket.push_back(server_fd);
     
     while (true) {
-    std::cout << "iter" << std::endl;
+    // std::cout << "iter" << std::endl;
 
     // eventNumb = kevent(kq, nullptr, ZERO, Revent, 64, nullptr); // wait
     std::vector<pollfd> tmp = clientsSocket;
     eventNumb = poll(&tmp[0], tmp.size(), -1);
-    std::cout << "event number ===? " << eventNumb << std::endl;
+    // std::cout << "event number ===? " << eventNumb << std::endl;
 
     for (size_t i = ZERO; i < tmp.size(); i++) {
         if (tmp[i].fd == sockFD) {
             int addrlen = sizeof(socketAddress);
             if ((clientSocket = accept(sockFD, (struct sockaddr *)(&socketAddress), (socklen_t *)&addrlen)) == FAILED) {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                    std::cout << "NO DATA IS BEEN RECEIVED!" << std::endl;
+                    // std::cout << "NO DATA IS BEEN RECEIVED!" << std::endl;
                     continue;
                 }
                 perror("accept()");
@@ -187,24 +204,24 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
             }
         } else {
             if (tmp[i].revents & POLLIN) {
-                requestByteSize = recv(tmp[i].fd, buffer, sizeof(buffer), ZERO);
+                requestByteSize = receiveData(tmp[i].fd);
                 std::cout << "request size ==> " << requestByteSize << std::endl;
-
                 if (requestByteSize == -1) {
                     if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                        std::cout << "NO DATA IS BEEN RECEIVED!" << std::endl;
+                        // std::cout << "NO DATA IS BEEN RECEIVED!" << std::endl;
                         continue;
                     }
                     perror("recv");
                 } else if (requestByteSize == 0) {
                     // Connection closed by the client
                     close(tmp[i].fd);
-                    std::cout << "CONNECTION CLOSED!" << std::endl;
+                    // std::cout << "CONNECTION CLOSED!" << std::endl;
                 } else {
                     // Data received
                     buffer[requestByteSize] = '\0';
-                    ft_parse_request(buffer);
-                    handleHttpRequest(tmp[i].fd, buffer);  // Use tmp[i].fd instead of clientSocket
+                    std::cout << buffer << std::endl;
+                    ft_parse_request(buffer.c_str());
+                    handleHttpRequest(tmp[i].fd, buffer.c_str());  // Use tmp[i].fd instead of clientSocket
                 }
             }
             // Handle POLLOUT for outgoing data if needed

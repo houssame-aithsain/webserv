@@ -3,16 +3,16 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+         #
+#    By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/29 20:25:53 by hait-hsa          #+#    #+#              #
-#    Updated: 2024/02/11 18:53:22 by gothmane         ###   ########.fr        #
+#    Updated: 2024/02/13 17:54:25 by hait-hsa         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 
 CC			=	c++
-CXXFLAGS	=	-Wall -Wextra -Werror -fsanitize=address -g
+CXXFLAGS	=	-Wall -Wextra -Werror #-fsanitize=address -g
 
 SRC			=	main.cpp server/Server.cpp parsing/parser.cpp request_response/Response.cpp
 HEADERS		=	server/Server.hpp parsing/parser.hpp  request_response/Response.hpp
