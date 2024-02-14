@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/14 09:58:59 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/14 10:06:07 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,16 +37,18 @@ int receiveData(int clientSocket) {
         int bytesRead = recv(clientSocket, chunk, sizeof(chunk), ZERO);
         if (bytesRead <= ZERO)
             break;
-        chunk[bytesRead - 1] = ZERO;
+        chunk[bytesRead - ONE] = ZERO;
         std::cout << yellowColor << chunk << resetColor << std::endl;
         buffer += chunk;
         dataSize += bytesRead;
     }
     std::cout << redColor << buffer << resetColor << std::endl;
+    // exit(0);
     return (dataSize);
 }
 
 void handelSignal(int signum) {
+    // Properly handle signal, close sockets, and exit
     for (size_t i = ZERO; i < clientsSocket.size(); i++)
         close(clientsSocket[i].fd);
     close(serverSocketFd);
@@ -67,6 +69,7 @@ std::string trim(const std::string& str, const std::string& charsToTrim) {
 // std::vector<std::pair<std::string, std::vector<std::string> > > request_data;
 
 void Server::handleHttpRequest(int clientSocket, const char* httpRequest) {
+    std::cout << greenColor << buffer << resetColor << std::endl;
     (void)httpRequest;
     std::cout << "######################################################\n";
 
@@ -222,7 +225,6 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
                     // std::cout << "CONNECTION CLOSED!" << std::endl;
                 } else {
                     // Data received
-                    buffer[requestByteSize] = '\0';
                     ft_parse_request(buffer.c_str());
                     handleHttpRequest(tmp[i].fd, buffer.c_str());
                 }
