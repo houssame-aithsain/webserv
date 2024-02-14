@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/11 20:57:36 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/02/12 11:07:57 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,5 @@ class Server : public Parser , public Response  {
         // server( const server & other );
         // server operator=(const server & other);
         void initializeSocket(  std::vector <server_data> serverData );
-        void handleHttpRequest(int clientSocket, char* httpRequest);
         void handleConnection(int clientSocket);
 };

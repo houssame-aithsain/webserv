@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/11 20:52:13 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/02/13 16:11:08 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 
 int sockFD;
 int clientSocket;
-char buffer[1024];
+char buffer[INT_MAX];
 
 void handelSignal(int signum) {
     // Properly handle signal, close sockets, and exit
@@ -39,49 +39,7 @@ std::string trim(const std::string& str, const std::string& charsToTrim) {
 
 // std::vector<std::pair<std::string, std::vector<std::string> > > request_data;
 
-void Server::handleHttpRequest(int clientSocket, char* httpRequest) 
-{
-    (void) httpRequest;
-    std::cout << "######################################################\n";
-    // std::vector<std::string> requestDataParsed = it->second;
-    if (request_data["Method"] == "GET") 
-    {
-    // std::cout << ft_getPageToRender(request_data) << std::endl;
-    std::cout << "Test || "<< request_data["Asset"];
-    std::string requestedResource = request_data["Asset"];
-    if (requestedResource == "/")
-        requestedResource = "/index.html";
-    std::ifstream file("."+requestedResource, std::ios::binary);
-    if (!file.is_open()) {
-        // File not found, respond with a 404 error
-        std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
-        send(clientSocket, response.c_str(), response.length(), 0);
-    } else {
-        // Read the entire content of the file into a string        
-        std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-        std::string content_type = "text/html";
-        std::string ext = requestedResource.substr(requestedResource.find_last_of(".") + 1);
-        if (ext == "css")
-            content_type = "text/css";
-        else if (ext == "png")
-            content_type = "image/png";
-        else if (ext == "jpg")
-            content_type = "image/jpeg";
-        // Build the HTTP response
-        std::string httpResponse = "HTTP/1.1 200 OK\r\n";
-        httpResponse += "Content-Type: "+content_type+"\r\n";
-        httpResponse += "Content-Length: " + std::to_string(content.size()) + "\r\n"; // remove to_string
-        httpResponse += "\r\n" + content;
-        // Send the HTTP response
-        send(clientSocket, httpResponse.c_str(), httpResponse.length(), 0);
-        // Clean up
-        file.close();
-    }
-        std::cout << std::endl;
-    }
-    std::cout << "######################################################\n\n";
 
-}
 
 void Server::initializeSocket(std::vector<server_data> serverData) {
 
@@ -97,6 +55,11 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
     socketAddress.sin_family = AF_INET;
     socketAddress.sin_addr.s_addr = INADDR_ANY;
     socketAddress.sin_port = htons(std::atoi(sockPort.c_str()));
+    int reuse = 1;
+    if (setsockopt(sockFD, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+        perror("setsockopt(SO_REUSEADDR) failed");
+        exit(EXIT_FAILURE);
+    }
     if (bind(sockFD, reinterpret_cast<struct sockaddr *>(&socketAddress), sizeof(socketAddress)) == FAILED) {
         std::cout << "failed to bind server socket" << std::endl;
         close(sockFD);
@@ -131,7 +94,11 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
                     continue;
                 } else
                     std::cout << "connection has been done successfully" << std::endl;
+                //
+                memset(&buffer, 0, INT_MAX);
+                bzero(&buffer, 1);
                 requestByteSize = recv(clientSocket, buffer, sizeof(buffer), ZERO);
+
                 if (requestByteSize <= ZERO)
                     break;
                 buffer[requestByteSize] = ZERO;

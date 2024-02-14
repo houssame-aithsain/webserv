@@ -1,0 +1,262 @@
+.flexContainer {
+  align-items: center;
+  display: flex;
+}
+
+.noWrapFlexContainer {
+  align-items: center;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.notifyButtonStyle {
+  cursor: pointer !important;
+  margin: 10px 0;
+  padding-left: 10px;
+  padding-right: 10px;
+  position: relative;
+  text-align: center;
+  white-space: normal;
+  width: 100%;
+  z-index: 1;
+}
+
+.submitButtonStyle {
+  width: 100% !important;
+}
+
+.inputStyle {
+  border: 1px solid #c6c6c6;
+  border-radius: 5px;
+  box-sizing: border-box;
+  height: 48px;
+  margin: 0 !important;
+  outline: none;
+  padding: 0 10px;
+  transition: all 0.4s;
+  -webkit-transition: all 0.4s;
+  width: 100%;
+}
+
+.errorStyle {
+  color: red;
+  font-size: 14px;
+  margin-top: 0;
+}
+
+.modalIconStyle {
+  margin-right: 10px;
+  height: 24px;
+  width: 24px;
+}
+
+.formTitleStyle {
+  color: #182036;
+  font-size: 18px !important;
+  font-weight: bold;
+  line-height: 18px !important;
+  margin-bottom: 20px;
+  margin-top: 0 !important;
+  padding: 0 !important;;
+}
+
+.fieldLabelStyle {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.fieldCheckboxStyle {
+  height: 17px !important;
+  margin: 0 !important;;
+  width: 17px !important;
+  min-width: 17px !important;
+  -webkit-appearance: auto !important;
+  display: block !important;
+}
+
+.agreementCheckboxStyle {
+  height: 13px !important;
+  width: 13px !important;
+  min-width: 13px !important;
+  -webkit-appearance: auto !important;
+  display: block !important;
+}
+
+.fieldLabelTextStyle {
+  color: #182036;
+  font-size: 16px !important;
+  font-weight: bold;
+  line-height: 16px !important;
+  padding: 0 0 0 5px !important;
+  margin: 0 !important;;
+}
+
+.channelWrapperStyle {
+  margin-bottom: 25px;
+}
+
+.modalDescriptionStyle {
+  color: #182036;
+  font-size: 14px;
+  margin-bottom: 10px;
+  margin-top: 0;
+}
+
+.modalWrapperStyle {
+  background-color: rgba(0, 0, 0, 0.7);
+  height: 100vh;
+  overflow: auto;
+  position: fixed;
+  right: 0;
+  top: 0;
+  transition: all 0.4s;
+  -webkit-transition: all 0.4s;
+  width: 100%;
+  z-index: 2147483646;
+}
+
+.modalBoxStyle {
+  background-color: #fff;
+  border-radius: 10px;
+  margin: 0 auto 300px;
+  padding: 50px 20px 20px;
+  position: absolute;
+  right: 50%;
+  top: 50%;
+  width: 360px;
+  transition: all 0.4s;
+  -webkit-transition: all 0.4s;
+  transform: translate(50%, -50%);
+  -webkit-transform: translate(50%, -50%);
+  -moz-transform: translate(50%, -50%);
+  -o-transform: translate(50%, -50%);
+  -ms-transform: translate(50%, -50%);
+}
+
+.modalCloseButtonStyle {
+  cursor: pointer;
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  height: 15px !important;
+  width: 15px !important;
+}
+
+.brandingStyle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  line-height: 15px;
+  margin-bottom: 0;
+  text-align: center;
+  color: #182036;
+}
+
+.selectBoxStyle {
+  border: 1px solid #c6c6c6;
+  border-radius: 3px;
+  height: 48px;
+  margin-bottom: 10px;
+  padding-left: 5px;
+  width: 100%;
+}
+
+.agreementTextLabelStyle {
+  align-items: center;
+  color: #182036;
+  display: flex;
+  font-size: 14px;
+}
+
+.floatButtonStyle {
+  border-radius: 5px 5px 0px 0px;
+  top: 50%;
+  width: 300px;
+  position: fixed !important;
+  right: 8px;
+  z-index: 2147483645;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer !important;
+  font-weight: bold;
+  margin: 0;
+  height: 50px;
+  transform: translate(45%, -50%) rotate(-90deg);
+  -webkit-transform: translate(45%, -50%) rotate(-90deg);
+  -moz-transform: translate(45%, -50%) rotate(-90deg);
+  -o-transform: translate(45%, -50%) rotate(-90deg);
+  -ms-transform: translate(45%, -50%) rotate(-90deg);
+}
+
+.toastStyle {
+  font-size: 14px;
+  line-height: 21px;
+  padding: 15px 30px;
+  position: fixed;
+  right: 15px;
+  bottom: 15px;
+  width: 340px;
+  z-index: 2147483646;
+}
+
+.livePreviewOverlayStyle {
+  content: "";
+  height: 100%;
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 100%;
+  z-index: 2147483647;
+}
+
+.hengam-product-price-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+}
+
+.hengam-product-price-wrapper .hengam-pre-discount-price {
+  text-decoration: line-through !important;
+  padding-right: 10px;
+}
+
+.hengam-product-price-wrapper .hengam-final-price {
+  font-weight: 600 !important;
+}
+
+.hengam-product-price-wrapper .hengam-preorder-badge {
+  background-color: rgb(222, 222, 222);
+  color: black;
+  border-radius: 100px;
+  padding: 4px 10px;
+  font-size: 12px;
+  margin-left: 15px;
+}
+
+.hengam-hide-buy-it-now-button-preorder, .hengam-hide-buy-it-now-button-restock {
+  display: none !important;
+}
+
+.hengam-preorder-button-loading {
+  opacity: .7;
+  pointer-events: none;
+}
+
+.hengam-preorder-button-spinner {
+  width: 25px;
+  height: 25px;
+  border: 4px solid #ddd;
+  border-top-color: #999;
+  border-radius: 50%;
+  animation: loading 0.8s ease infinite;
+  margin: auto;
+  display: block !important;
+}
+
+@keyframes loading {
+  to {
+    transform: rotate(1turn);
+  }
+}
