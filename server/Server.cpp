@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/13 17:54:35 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/14 09:54:24 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,27 +17,33 @@
 #include <fcntl.h>
 #include <sys/poll.h>
 
-int sockFD;
-std::vector<pollfd> clientsSocket;
+const char* greenColor = "\033[32m";
+const char* redColor = "\033[31m";
+const char* yellowColor = "\033[33m";
+const char* resetColor = "\033[0m";
+
 std::string buffer;
+int serverSocketFd;
+std::vector<pollfd> clientsSocket;
 
-const int CHUNK_SIZE = 1024;
-
-int receiveData(int socket) {
-    buffer.clear();  // Clear the buffer
+int receiveData(int clientSocket) {
     int dataSize = 0;
+    char chunk[CHUNK_SIZE];
+    
+    buffer.clear();
     while (true) {
-        char chunk[CHUNK_SIZE];
-        int bytesRead = recv(socket, chunk, sizeof(chunk), ZERO);
-        if (bytesRead <= 0) {
-            // Either an error or end of data
+        memset(chunk, ZERO, sizeof(chunk));
+        bzero(chunk, sizeof(chunk));
+        int bytesRead = recv(clientSocket, chunk, sizeof(chunk), ZERO);
+        if (bytesRead <= ZERO)
             break;
-        }
-
-        // Append the received chunk to the buffer
+        chunk[bytesRead - 1] = ZERO;
+        std::cout << yellowColor << chunk << resetColor << std::endl;
         buffer += chunk;
         dataSize += bytesRead;
     }
+    std::cout << redColor << buffer << resetColor << std::endl;
+    // exit(0);
     return (dataSize);
 }
 
@@ -45,7 +51,7 @@ void handelSignal(int signum) {
     // Properly handle signal, close sockets, and exit
     for (size_t i = ZERO; i < clientsSocket.size(); i++)
         close(clientsSocket[i].fd);
-    close(sockFD);
+    close(serverSocketFd);
     std::cout << "Sockets have been closed!" << std::endl;
     exit(signum);
 }
@@ -63,6 +69,7 @@ std::string trim(const std::string& str, const std::string& charsToTrim) {
 // std::vector<std::pair<std::string, std::vector<std::string> > > request_data;
 
 void Server::handleHttpRequest(int clientSocket, const char* httpRequest) {
+    std::cout << greenColor << buffer << resetColor << std::endl;
     (void)httpRequest;
     std::cout << "######################################################\n";
 
@@ -130,49 +137,49 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
     int requestByteSize;
     sockaddr_in socketAddress;
     std::string sockPort = trim(serverData[ZERO].server[ZERO].second[ZERO], "\"");
-    int sockFD = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    int serverSocketFd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     socketAddress.sin_family = AF_INET;
     socketAddress.sin_addr.s_addr = INADDR_ANY;
     socketAddress.sin_port = htons(std::atoi(sockPort.c_str()));
     // need to be explained !
     int reuse = 1;
-    if (setsockopt(sockFD, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+    if (setsockopt(serverSocketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
         perror("setsockopt(SO_REUSEADDR) failed");
         exit(EXIT_FAILURE);
     }
     // end explain
-    int status = fcntl(sockFD, F_SETFL, fcntl(sockFD, F_GETFL, 0) | O_NONBLOCK);
+    int status = fcntl(serverSocketFd, F_SETFL, fcntl(serverSocketFd, F_GETFL, 0) | O_NONBLOCK);
     if (status == -1){
         perror("calling fcntl");
     }
-    if (bind(sockFD, reinterpret_cast<struct sockaddr *>(&socketAddress), sizeof(socketAddress)) == FAILED) {
+    if (bind(serverSocketFd, reinterpret_cast<struct sockaddr *>(&socketAddress), sizeof(socketAddress)) == FAILED) {
         std::cout << "failed to bind server socket" << std::endl;
-        close(sockFD);
+        close(serverSocketFd);
         exit(10);
     }
     // if ((kq = kqueue()) == FAILED) {
     //     std::cout << "failed to create a kernel event queue" << std::endl;
-    //     close(sockFD);
+    //     close(serverSocketFd);
     //     close(kq);
     //     exit(14);
     // }
-    // EV_SET(&event, sockFD, EVFILT_READ, EV_ADD , ZERO, ZERO, nullptr);
+    // EV_SET(&event, serverSocketFd, EVFILT_READ, EV_ADD , ZERO, ZERO, nullptr);
     // if (kevent(kq, &event, ONE, nullptr, ZERO, nullptr)) {
     //     std::cout << "failed to associat event with kernel event queue!" << std::endl;
-    //     close(sockFD);
+    //     close(serverSocketFd);
     //     close(kq);
     //     exit(18);
     // }
-    if (listen(sockFD, 10) == FAILED) {
+    if (listen(serverSocketFd, 10) == FAILED) {
         std::cout << "failed to make the socket at the listen mode!" << std::endl;
-        close(sockFD);
+        close(serverSocketFd);
         exit(11);
     }
     std::cout << "server now is listening in port " << sockPort << std::endl;
     signal(SIGINT, handelSignal);
     pollfd server_fd;
-    server_fd.fd = sockFD;
+    server_fd.fd = serverSocketFd;
     server_fd.events = POLLIN | POLL_OUT;
     server_fd.revents = 0;
     clientsSocket.push_back(server_fd);
@@ -186,9 +193,9 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
     // std::cout << "event number ===? " << eventNumb << std::endl;
 
     for (size_t i = ZERO; i < tmp.size(); i++) {
-        if (tmp[i].fd == sockFD) {
+        if (tmp[i].fd == serverSocketFd) {
             int addrlen = sizeof(socketAddress);
-            if ((clientSocket = accept(sockFD, (struct sockaddr *)(&socketAddress), (socklen_t *)&addrlen)) == FAILED) {
+            if ((clientSocket = accept(serverSocketFd, (struct sockaddr *)(&socketAddress), (socklen_t *)&addrlen)) == FAILED) {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) {
                     // std::cout << "NO DATA IS BEEN RECEIVED!" << std::endl;
                     continue;
@@ -219,9 +226,8 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
                 } else {
                     // Data received
                     buffer[requestByteSize] = '\0';
-                    std::cout << buffer << std::endl;
                     ft_parse_request(buffer.c_str());
-                    handleHttpRequest(tmp[i].fd, buffer.c_str());  // Use tmp[i].fd instead of clientSocket
+                    handleHttpRequest(tmp[i].fd, buffer.c_str());
                 }
             }
             // Handle POLLOUT for outgoing data if needed
@@ -231,5 +237,5 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
         }
     }
 }
-    close(sockFD);
+    close(serverSocketFd);
 }
