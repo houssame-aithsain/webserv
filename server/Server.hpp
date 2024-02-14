@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/14 10:13:40 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/14 11:38:31 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 #include <iterator>
 #include <cstring>
 
-#define CHUNK_SIZE 10
+#define CHUNK_SIZE 1024
 #define ZERO 0
 #define ONE 1
 #define FAILED -1
@@ -37,6 +37,6 @@ class Server : public Parser , public Response  {
         // server( const server & other );
         // server operator=(const server & other);
         void initializeSocket(  std::vector <server_data> serverData );
-        void handleHttpRequest(int clientSocket, const char* httpRequest);
-        void handleConnection(int clientSocket);
+        void handleHttpRequest(int clientSocket);
+        // void handleConnection(int clientSocket);
 };

@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/14 10:06:07 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/14 12:01:04 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,20 +29,20 @@ std::vector<pollfd> clientsSocket;
 int receiveData(int clientSocket) {
     int dataSize = 0;
     char chunk[CHUNK_SIZE];
-    
+
     buffer.clear();
     while (true) {
         memset(chunk, ZERO, sizeof(chunk));
         bzero(chunk, sizeof(chunk));
-        int bytesRead = recv(clientSocket, chunk, sizeof(chunk), ZERO);
+        int bytesRead = recv(clientSocket, chunk, sizeof(chunk) - ONE, ZERO);
         if (bytesRead <= ZERO)
             break;
-        chunk[bytesRead - ONE] = ZERO;
-        std::cout << yellowColor << chunk << resetColor << std::endl;
+        chunk[bytesRead] = ZERO;
+        std::cout << yellowColor << chunk << resetColor;
         buffer += chunk;
         dataSize += bytesRead;
     }
-    std::cout << redColor << buffer << resetColor << std::endl;
+    // std::cout << redColor << buffer << resetColor << std::endl;
     // exit(0);
     return (dataSize);
 }
@@ -68,9 +68,8 @@ std::string trim(const std::string& str, const std::string& charsToTrim) {
 
 // std::vector<std::pair<std::string, std::vector<std::string> > > request_data;
 
-void Server::handleHttpRequest(int clientSocket, const char* httpRequest) {
-    std::cout << greenColor << buffer << resetColor << std::endl;
-    (void)httpRequest;
+void Server::handleHttpRequest(int clientSocket) {
+    // std::cout << greenColor << buffer << resetColor << std::endl;
     std::cout << "######################################################\n";
 
     if (request_data["Method"] == "GET") {
@@ -111,7 +110,7 @@ void Server::handleHttpRequest(int clientSocket, const char* httpRequest) {
                 if (bytesSent == -1) {
                     if (errno == EAGAIN || errno == EWOULDBLOCK) {
                         // Output buffer is full, continue with other tasks
-                        std::cout << "Output buffer is full. Continue with other tasks." << std::endl;
+                        // std::cout << "Output buffer is full. Continue with other tasks." << std::endl;
                         // You may want to add a delay or use a different strategy here
                         continue;
                     } else {
@@ -150,7 +149,7 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
     }
     // end explain
     int status = fcntl(serverSocketFd, F_SETFL, fcntl(serverSocketFd, F_GETFL, 0) | O_NONBLOCK);
-    if (status == -1){
+    if (status == -1) {
         perror("calling fcntl");
     }
     if (bind(serverSocketFd, reinterpret_cast<struct sockaddr *>(&socketAddress), sizeof(socketAddress)) == FAILED) {
@@ -215,18 +214,15 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
                 std::cout << "request size ==> " << requestByteSize << std::endl;
                 if (requestByteSize == -1) {
                     if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                        // std::cout << "NO DATA IS BEEN RECEIVED!" << std::endl;
                         continue;
                     }
                     perror("recv");
                 } else if (requestByteSize == 0) {
-                    // Connection closed by the client
                     close(tmp[i].fd);
-                    // std::cout << "CONNECTION CLOSED!" << std::endl;
                 } else {
                     // Data received
                     ft_parse_request(buffer.c_str());
-                    handleHttpRequest(tmp[i].fd, buffer.c_str());
+                    handleHttpRequest(tmp[i].fd);
                 }
             }
             // Handle POLLOUT for outgoing data if needed
