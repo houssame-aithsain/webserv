@@ -3,10 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2024/02/13 16:11:08 by gothmane         ###   ########.fr       */
+=======
+/*   Updated: 2024/02/14 12:01:04 by hait-hsa         ###   ########.fr       */
+>>>>>>> cdf40eac60e9a214283d8d41c1a5a24454d7ae90
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +18,44 @@
 #include <unistd.h>
 #include <fstream>
 #include <sstream>
+#include <fcntl.h>
+#include <sys/poll.h>
 
-int sockFD;
-int clientSocket;
-char buffer[INT_MAX];
+const char* greenColor = "\033[32m";
+const char* redColor = "\033[31m";
+const char* yellowColor = "\033[33m";
+const char* resetColor = "\033[0m";
+
+std::string buffer;
+int serverSocketFd;
+std::vector<pollfd> clientsSocket;
+
+int receiveData(int clientSocket) {
+    int dataSize = 0;
+    char chunk[CHUNK_SIZE];
+
+    buffer.clear();
+    while (true) {
+        memset(chunk, ZERO, sizeof(chunk));
+        bzero(chunk, sizeof(chunk));
+        int bytesRead = recv(clientSocket, chunk, sizeof(chunk) - ONE, ZERO);
+        if (bytesRead <= ZERO)
+            break;
+        chunk[bytesRead] = ZERO;
+        std::cout << yellowColor << chunk << resetColor;
+        buffer += chunk;
+        dataSize += bytesRead;
+    }
+    // std::cout << redColor << buffer << resetColor << std::endl;
+    // exit(0);
+    return (dataSize);
+}
 
 void handelSignal(int signum) {
     // Properly handle signal, close sockets, and exit
-    close(clientSocket);
-    close(sockFD);
+    for (size_t i = ZERO; i < clientsSocket.size(); i++)
+        close(clientsSocket[i].fd);
+    close(serverSocketFd);
     std::cout << "Sockets have been closed!" << std::endl;
     exit(signum);
 }
@@ -39,76 +72,169 @@ std::string trim(const std::string& str, const std::string& charsToTrim) {
 
 // std::vector<std::pair<std::string, std::vector<std::string> > > request_data;
 
+void Server::handleHttpRequest(int clientSocket) {
+    // std::cout << greenColor << buffer << resetColor << std::endl;
+    std::cout << "######################################################\n";
 
+    if (request_data["Method"] == "GET") {
+        std::string requestedResource = request_data["Asset"];
+        if (requestedResource == "/")
+            requestedResource = "/index.html";
+
+        std::ifstream file("." + requestedResource, std::ios::binary);
+        if (!file.is_open()) {
+            std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
+            send(clientSocket, response.c_str(), response.length(), 0);
+        } else {
+            // Read the entire content of the file into a string        
+            std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+            file.close();
+
+            std::string content_type = "text/html";
+            std::string ext = requestedResource.substr(requestedResource.find_last_of(".") + 1);
+            if (ext == "css")
+                content_type = "text/css";
+            else if (ext == "png")
+                content_type = "image/png";
+            else if (ext == "jpg")
+                content_type = "image/jpeg";
+
+            // Build the HTTP response
+            std::string httpResponse = "HTTP/1.1 200 OK\r\n";
+            httpResponse += "Content-Type: " + content_type + "\r\n";
+            httpResponse += "Content-Length: " + std::to_string(content.size()) + "\r\n";
+            httpResponse += "\r\n" + content;
+
+            // Send the HTTP response
+            size_t totalBytesSent = 0;
+            size_t remainingBytes = httpResponse.length();
+
+            while (totalBytesSent < httpResponse.length()) {
+                ssize_t bytesSent = send(clientSocket, httpResponse.c_str() + totalBytesSent, remainingBytes, 0);
+                if (bytesSent == -1) {
+                    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                        // Output buffer is full, continue with other tasks
+                        // std::cout << "Output buffer is full. Continue with other tasks." << std::endl;
+                        // You may want to add a delay or use a different strategy here
+                        continue;
+                    } else {
+                        perror("send");
+                        // Handle other error conditions
+                        // Close or handle the socket accordingly
+                        break;
+                    }
+                }
+                totalBytesSent += static_cast<size_t>(bytesSent);
+                remainingBytes -= static_cast<size_t>(bytesSent);
+            }
+        }
+    }
+    std::cout << "######################################################\n\n";
+    close(clientSocket);
+}
 
 void Server::initializeSocket(std::vector<server_data> serverData) {
 
-    int kq;
     int eventNumb;
+    int clientSocket;
     int requestByteSize;
-    struct kevent event;
-    struct kevent Revent;
     sockaddr_in socketAddress;
     std::string sockPort = trim(serverData[ZERO].server[ZERO].second[ZERO], "\"");
-    int sockFD = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    int serverSocketFd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     socketAddress.sin_family = AF_INET;
     socketAddress.sin_addr.s_addr = INADDR_ANY;
     socketAddress.sin_port = htons(std::atoi(sockPort.c_str()));
+    // need to be explained !
     int reuse = 1;
-    if (setsockopt(sockFD, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+    if (setsockopt(serverSocketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
         perror("setsockopt(SO_REUSEADDR) failed");
         exit(EXIT_FAILURE);
     }
-    if (bind(sockFD, reinterpret_cast<struct sockaddr *>(&socketAddress), sizeof(socketAddress)) == FAILED) {
+    // end explain
+    int status = fcntl(serverSocketFd, F_SETFL, fcntl(serverSocketFd, F_GETFL, 0) | O_NONBLOCK);
+    if (status == -1) {
+        perror("calling fcntl");
+    }
+    if (bind(serverSocketFd, reinterpret_cast<struct sockaddr *>(&socketAddress), sizeof(socketAddress)) == FAILED) {
         std::cout << "failed to bind server socket" << std::endl;
-        close(sockFD);
+        close(serverSocketFd);
         exit(10);
     }
-    if ((kq = kqueue()) == FAILED) {
-        std::cout << "failed to create a kernel event queue" << std::endl;
-        close(sockFD);
-        close(kq);
-        exit(14);
-    }
-    EV_SET(&event, sockFD, EVFILT_READ, EV_ADD , ZERO, ZERO, nullptr);
-    if (kevent(kq, &event, ONE, nullptr, ZERO, nullptr)) {
-        std::cout << "failed to associat event with kernel event queue!" << std::endl;
-        close(sockFD);
-        close(kq);
-        exit(18);
-    }
-    if (listen(sockFD, 10) == FAILED) {
+    // if ((kq = kqueue()) == FAILED) {
+    //     std::cout << "failed to create a kernel event queue" << std::endl;
+    //     close(serverSocketFd);
+    //     close(kq);
+    //     exit(14);
+    // }
+    // EV_SET(&event, serverSocketFd, EVFILT_READ, EV_ADD , ZERO, ZERO, nullptr);
+    // if (kevent(kq, &event, ONE, nullptr, ZERO, nullptr)) {
+    //     std::cout << "failed to associat event with kernel event queue!" << std::endl;
+    //     close(serverSocketFd);
+    //     close(kq);
+    //     exit(18);
+    // }
+    if (listen(serverSocketFd, 10) == FAILED) {
         std::cout << "failed to make the socket at the listen mode!" << std::endl;
-        close(sockFD);
+        close(serverSocketFd);
         exit(11);
     }
     std::cout << "server now is listening in port " << sockPort << std::endl;
     signal(SIGINT, handelSignal);
+    pollfd server_fd;
+    server_fd.fd = serverSocketFd;
+    server_fd.events = POLLIN | POLL_OUT;
+    server_fd.revents = 0;
+    clientsSocket.push_back(server_fd);
+    
     while (true) {
-        eventNumb = kevent(kq, nullptr, ZERO, &Revent, ONE, nullptr);
-        for (int i = ZERO; i < eventNumb; i++) {
-            if (Revent.ident == (uintptr_t)sockFD) {
-                if ((clientSocket = accept(sockFD, nullptr, nullptr)) == FAILED) {
-                    std::cout << "{=====> error: connection failed <=====}" << std::endl;
-                    continue;
-                } else
-                    std::cout << "connection has been done successfully" << std::endl;
-                //
-                memset(&buffer, 0, INT_MAX);
-                bzero(&buffer, 1);
-                requestByteSize = recv(clientSocket, buffer, sizeof(buffer), ZERO);
+    // std::cout << "iter" << std::endl;
 
-                if (requestByteSize <= ZERO)
-                    break;
-                buffer[requestByteSize] = ZERO;
-                // std::cout << buffer << std::endl;
-                // Hadi ra dyali la bghiti hyedha
-                ft_parse_request(buffer);
-                handleHttpRequest(clientSocket, buffer);
+    // eventNumb = kevent(kq, nullptr, ZERO, Revent, 64, nullptr); // wait
+    std::vector<pollfd> tmp = clientsSocket;
+    eventNumb = poll(&tmp[0], tmp.size(), -1);
+    // std::cout << "event number ===? " << eventNumb << std::endl;
+
+    for (size_t i = ZERO; i < tmp.size(); i++) {
+        if (tmp[i].fd == serverSocketFd) {
+            int addrlen = sizeof(socketAddress);
+            if ((clientSocket = accept(serverSocketFd, (struct sockaddr *)(&socketAddress), (socklen_t *)&addrlen)) == FAILED) {
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    // std::cout << "NO DATA IS BEEN RECEIVED!" << std::endl;
+                    continue;
+                }
+                perror("accept()");
+            } else {
+                std::cout << "connection has been done successfully" << std::endl;
+                pollfd new_client;
+                new_client.fd = clientSocket;
+                new_client.events = POLLIN | POLLOUT;
+                new_client.revents = 0;
+                clientsSocket.push_back(new_client);
+            }
+        } else {
+            if (tmp[i].revents & POLLIN) {
+                requestByteSize = receiveData(tmp[i].fd);
+                std::cout << "request size ==> " << requestByteSize << std::endl;
+                if (requestByteSize == -1) {
+                    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                        continue;
+                    }
+                    perror("recv");
+                } else if (requestByteSize == 0) {
+                    close(tmp[i].fd);
+                } else {
+                    // Data received
+                    ft_parse_request(buffer.c_str());
+                    handleHttpRequest(tmp[i].fd);
+                }
+            }
+            // Handle POLLOUT for outgoing data if needed
+            if (tmp[i].revents & POLLOUT) {
+                // Handle outgoing data if necessary
             }
         }
-        close(clientSocket);
     }
-    close(sockFD);
+}
+    close(serverSocketFd);
 }
