@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/11 18:36:05 by gothmane          #+#    #+#             */
-/*   Updated: 2024/02/14 12:12:04 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/02/15 15:34:56 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -162,7 +162,7 @@ std::string ft_getQuery(std::string pageName)
     return (name);
 }
 
-std::string Response::handleHttpRequest(int clientSocket, char* httpRequest) 
+void Response::handleHttpRequest(int clientSocket, char* httpRequest) 
 {
     (void) httpRequest;
     (void) clientSocket;
@@ -191,8 +191,7 @@ std::string Response::handleHttpRequest(int clientSocket, char* httpRequest)
         httpResponse += "Content-Length: " + std::to_string(response.size()) + "\r\n"; // remove to_string
         httpResponse += "\r\n" + response;
         // return t houssam
-        return (httpResponse);
-        // send(clientSocket, httpResponse.c_str(), httpResponse.length(), 0);
+        send(clientSocket, httpResponse.c_str(), httpResponse.length(), 0);
     } else {
         // Read the entire content of the file into a string        
         std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
@@ -211,16 +210,15 @@ std::string Response::handleHttpRequest(int clientSocket, char* httpRequest)
         httpResponse += "\r\n" + content;
         // hadi l houssam
         // Send the HTTP response
-        return (httpResponse);
-        // size_t sizeto; 
-        // sizeto = send(clientSocket, httpResponse.c_str(), httpResponse.length(), 0);
-        // std::cout << "=>>>>>>>>>>> sizeto = " << sizeto << "\n";
+        size_t sizeto; 
+        sizeto = send(clientSocket, httpResponse.c_str(), httpResponse.length(), 0);
+        std::cout << "=>>>>>>>>>>> sizeto = " << sizeto << "\n";
         // Clean up
         file.close();
     }
         // std::cout << std::endl;
     }
-    return ("");
+    // return ("");
     // std::cout << "######################################################\n\n";
 
 }

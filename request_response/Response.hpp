@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/11 18:36:03 by gothmane          #+#    #+#             */
-/*   Updated: 2024/02/14 12:11:48 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/02/14 18:48:03 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,5 +33,5 @@ class Response
         ~Response();
         std::string ft_getPageToRender(std::vector<std::pair<std::string, std::vector<std::string> > > ParsedRequest);
         void ft_parse_request(std::string request);
-        std::string handleHttpRequest(int clientSocket, char* httpRequest); 
+        void handleHttpRequest(int clientSocket, char* httpRequest); 
 };

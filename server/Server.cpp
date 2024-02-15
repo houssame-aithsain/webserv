@@ -6,11 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2024/02/13 16:11:08 by gothmane         ###   ########.fr       */
-=======
-/*   Updated: 2024/02/14 12:01:04 by hait-hsa         ###   ########.fr       */
->>>>>>> cdf40eac60e9a214283d8d41c1a5a24454d7ae90
+/*   Updated: 2024/02/15 20:06:38 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,35 +16,40 @@
 #include <sstream>
 #include <fcntl.h>
 #include <sys/poll.h>
+#include <map>
 
 const char* greenColor = "\033[32m";
 const char* redColor = "\033[31m";
 const char* yellowColor = "\033[33m";
 const char* resetColor = "\033[0m";
 
-std::string buffer;
 int serverSocketFd;
+std::map<int, std::string> clientsBuffer;
 std::vector<pollfd> clientsSocket;
 
-int receiveData(int clientSocket) {
-    int dataSize = 0;
+int Server::receiveData(int clientSocket) {
+
     char chunk[CHUNK_SIZE];
 
-    buffer.clear();
-    while (true) {
-        memset(chunk, ZERO, sizeof(chunk));
-        bzero(chunk, sizeof(chunk));
-        int bytesRead = recv(clientSocket, chunk, sizeof(chunk) - ONE, ZERO);
-        if (bytesRead <= ZERO)
-            break;
-        chunk[bytesRead] = ZERO;
-        std::cout << yellowColor << chunk << resetColor;
-        buffer += chunk;
-        dataSize += bytesRead;
+    bzero(chunk, sizeof(chunk));
+    int bytesRead = recv(clientSocket, chunk, sizeof(chunk) - 1, 0);
+    if (bytesRead == -1) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK)
+            return bytesRead;
+        else {
+            perror("recv");
+            return -1;
+        }
     }
-    // std::cout << redColor << buffer << resetColor << std::endl;
-    // exit(0);
-    return (dataSize);
+    chunk[bytesRead] = '\0';
+    // std::cout << yellowColor << chunk << resetColor;
+    // search for the client socket fd
+    std::map<int, std::string>::iterator it = clientsBuffer.find(clientSocket);
+    if (it != clientsBuffer.end())
+        clientsBuffer[clientSocket].append(chunk);
+    else
+        clientsBuffer.insert(std::make_pair(clientSocket, chunk));
+    return bytesRead;
 }
 
 void handelSignal(int signum) {
@@ -84,6 +85,7 @@ void Server::handleHttpRequest(int clientSocket) {
         std::ifstream file("." + requestedResource, std::ios::binary);
         if (!file.is_open()) {
             std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
+            std::cout << "NOT FOUND!!!!" << std::endl;
             send(clientSocket, response.c_str(), response.length(), 0);
         } else {
             // Read the entire content of the file into a string        
@@ -109,24 +111,25 @@ void Server::handleHttpRequest(int clientSocket) {
             size_t totalBytesSent = 0;
             size_t remainingBytes = httpResponse.length();
 
-            while (totalBytesSent < httpResponse.length()) {
-                ssize_t bytesSent = send(clientSocket, httpResponse.c_str() + totalBytesSent, remainingBytes, 0);
+            ssize_t bytesSent = send(clientSocket, httpResponse.c_str() + totalBytesSent, remainingBytes, 0);
+            // while (totalBytesSent < httpResponse.length()) {
+            //     ssize_t bytesSent = send(clientSocket, httpResponse.c_str() + totalBytesSent, remainingBytes, 0);
                 if (bytesSent == -1) {
                     if (errno == EAGAIN || errno == EWOULDBLOCK) {
                         // Output buffer is full, continue with other tasks
                         // std::cout << "Output buffer is full. Continue with other tasks." << std::endl;
                         // You may want to add a delay or use a different strategy here
-                        continue;
+                        // continue;
                     } else {
                         perror("send");
                         // Handle other error conditions
                         // Close or handle the socket accordingly
-                        break;
+                        // break;
                     }
                 }
-                totalBytesSent += static_cast<size_t>(bytesSent);
-                remainingBytes -= static_cast<size_t>(bytesSent);
-            }
+            //     totalBytesSent += static_cast<size_t>(bytesSent);
+            //     remainingBytes -= static_cast<size_t>(bytesSent);
+            // }
         }
     }
     std::cout << "######################################################\n\n";
@@ -181,18 +184,17 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
     }
     std::cout << "server now is listening in port " << sockPort << std::endl;
     signal(SIGINT, handelSignal);
+    signal(SIGPIPE, SIG_IGN);
     pollfd server_fd;
     server_fd.fd = serverSocketFd;
     server_fd.events = POLLIN | POLL_OUT;
     server_fd.revents = 0;
     clientsSocket.push_back(server_fd);
-    
     while (true) {
-    // std::cout << "iter" << std::endl;
-
+    // std::cout << "enter.." << std::endl;
     // eventNumb = kevent(kq, nullptr, ZERO, Revent, 64, nullptr); // wait
     std::vector<pollfd> tmp = clientsSocket;
-    eventNumb = poll(&tmp[0], tmp.size(), -1);
+    eventNumb = poll(tmp.data(), tmp.size(), -1);
     // std::cout << "event number ===? " << eventNumb << std::endl;
 
     for (size_t i = ZERO; i < tmp.size(); i++) {
@@ -205,6 +207,10 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
                 }
                 perror("accept()");
             } else {
+                int status = fcntl(clientSocket, F_SETFL, fcntl(clientSocket, F_GETFL, 0) | O_NONBLOCK);
+                if (status == -1) {
+                    perror("calling fcntl");
+                }
                 std::cout << "connection has been done successfully" << std::endl;
                 pollfd new_client;
                 new_client.fd = clientSocket;
@@ -215,7 +221,7 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
         } else {
             if (tmp[i].revents & POLLIN) {
                 requestByteSize = receiveData(tmp[i].fd);
-                std::cout << "request size ==> " << requestByteSize << std::endl;
+                // std::cout << "request size ==> " << requestByteSize << std::endl;
                 if (requestByteSize == -1) {
                     if (errno == EAGAIN || errno == EWOULDBLOCK) {
                         continue;
@@ -223,15 +229,30 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
                     perror("recv");
                 } else if (requestByteSize == 0) {
                     close(tmp[i].fd);
-                } else {
-                    // Data received
-                    ft_parse_request(buffer.c_str());
-                    handleHttpRequest(tmp[i].fd);
+                    clientsBuffer.erase(tmp[i].fd);
                 }
             }
-            // Handle POLLOUT for outgoing data if needed
-            if (tmp[i].revents & POLLOUT) {
-                // Handle outgoing data if necessary
+            std::map<int, std::string>::iterator it = clientsBuffer.find(tmp[i].fd);
+            if ((tmp[i].revents & POLLOUT) && it != clientsBuffer.end()) {
+                ft_parse_request(clientsBuffer[tmp[i].fd]);
+                size_t requestLenght = clientsBuffer[tmp[i].fd].find("\r\n\r\n");
+                std::map<std::string, std::string>::iterator contentLength = request_data.find("Content-Length");
+                if (requestLenght != std::string::npos && contentLength == request_data.end()) {
+                    std::cout << redColor << "GET" << resetColor << std::endl;
+                    std::cout << greenColor << contentLength->second << resetColor << std::endl;
+                    std::cout << redColor << tmp[i].fd << resetColor << std::endl;
+                    handleHttpRequest(tmp[i].fd);
+                    clientsBuffer.erase(tmp[i].fd);
+                }
+                if (contentLength != request_data.end() && (int)atoi(contentLength->second.c_str()) > ZERO) {
+                    std::cout << greenColor << "POST" << resetColor << std::endl;
+                    if ((int)atoi(contentLength->second.c_str()) <= (int)clientsBuffer[tmp[i].fd].size()) {
+                        std::cout << redColor << clientsBuffer[tmp[i].fd] << resetColor << std::endl;
+                        handleHttpRequest(tmp[i].fd);
+                        clientsBuffer.erase(tmp[i].fd);
+                    }
+                request_data.clear();
+                }
             }
         }
     }
