@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/17 10:31:37 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/17 11:30:18 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,7 @@ const char* redColor = "\033[31m";
 const char* yellowColor = "\033[33m";
 const char* resetColor = "\033[0m";
 
-int count = 0;
-
 int serverSocketFd;
-// std::map<int, std::string> clientsBuffer;
 std::map<int, Client> clientsSocket;
 // atributes
 
@@ -89,7 +86,6 @@ std::vector<Client> Server::creatClientOBJ(void) {
 // end atributes
 
 std::string trim(const std::string& str, const std::string& charsToTrim) {
-    // Trim function to remove leading and trailing whitespaces
     size_t start = str.find_first_not_of(charsToTrim);
     size_t end = str.find_last_not_of(charsToTrim);
 
@@ -222,6 +218,24 @@ bool Server::readFromClientSocketFd(int index) {
     return true;
 }
 
+void Server::GET( int index ) {
+
+    std::cout << redColor << "GET" << resetColor << std::endl;
+    std::cout << redColor << tmpEvents[index].fd << resetColor << std::endl;
+    handleHttpRequest(tmpEvents[index].fd);
+    clientsSocket[tmpEvents[index].fd].clearBuffer();
+}
+
+void Server::POST(int index, std::map<std::string, std::string>::iterator contentLength) {
+
+    std::cout << greenColor << "POST" << resetColor << std::endl;
+    if ((int)atoi(contentLength->second.c_str()) <= (int)clientsSocket[tmpEvents[index].fd].getBuffer().size()) {
+        std::cout << redColor << clientsSocket[tmpEvents[index].fd].getBuffer() << resetColor << std::endl;
+        handleHttpRequest(tmpEvents[index].fd);
+        clientsSocket[tmpEvents[index].fd].clearBuffer();
+    }
+}
+
 void Server::initializeSocket(std::vector<server_data> serverData) {
 
     int sockPort = std::atoi(trim(serverData[ZERO].server[ZERO].second[ZERO], "\"").c_str());
@@ -240,7 +254,6 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
     while (true) {
     tmpEvents = this->getAllClientsFd();
     poll(tmpEvents.data(), tmpEvents.size(), FAILED);
-    // clientsSocket = tmpEvents;
     for (size_t i = ZERO; i < tmpEvents.size(); i++) {
         if (tmpEvents[i].fd == serverSocketFd) {
             if (!this->acceptNewConnection())
@@ -249,28 +262,17 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
             if (!this->readFromClientSocketFd(i))
                 continue;
             if ((tmpEvents[i].revents & POLLOUT)) {
-                ft_parse_request(clientsSocket[tmpEvents[i].fd].getBuffer());
-                size_t requestLenght = clientsSocket[tmpEvents[i].fd].getBuffer().find("\r\n\r\n");
-                std::map<std::string, std::string>::iterator contentLength = request_data.find("Content-Length");
-                if (requestLenght != std::string::npos && contentLength == request_data.end()) {
-                    std::cout << redColor << "GET" << resetColor << std::endl;
-                    std::cout << redColor << tmpEvents[i].fd << resetColor << std::endl;
-                    handleHttpRequest(tmpEvents[i].fd);
-                    clientsSocket[tmpEvents[i].fd].clearBuffer();
-                }
-                if (contentLength != request_data.end() && (int)atoi(contentLength->second.c_str()) > ZERO) {
-                    std::cout << greenColor << "POST" << resetColor << std::endl;
-                    if ((int)atoi(contentLength->second.c_str()) <= (int)clientsSocket[tmpEvents[i].fd].getBuffer().size()) {
-                        std::cout << redColor << clientsSocket[tmpEvents[i].fd].getBuffer() << resetColor << std::endl;
-                        handleHttpRequest(tmpEvents[i].fd);
-                        clientsSocket[tmpEvents[i].fd].clearBuffer();
-                    }
-                request_data.clear();
+                    ft_parse_request(clientsSocket[tmpEvents[i].fd].getBuffer());
+                    size_t requestLenght = clientsSocket[tmpEvents[i].fd].getBuffer().find("\r\n\r\n"); // parcer
+                    std::map<std::string, std::string>::iterator contentLength = request_data.find("Content-Length");
+                    if (requestLenght != std::string::npos && contentLength == request_data.end())
+                        this->GET(i);
+                    if (contentLength != request_data.end() && (int)atoi(contentLength->second.c_str()) > ZERO)
+                        this->POST(i, contentLength);
+                    request_data.clear();
                 }
             }
         }
-        count++;
     }
-}
     close(serverSocketFd);
 }

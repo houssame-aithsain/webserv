@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/16 23:47:38 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/17 11:24:44 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,6 +72,8 @@ class Server : public Parser , public Response , public Client {
         std::vector<pollfd> getAllClientsFd(void);
         std::vector<Client> creatClientOBJ(void);
         static void handelSignal(int signum);
+        void GET( int index );
+        void POST(int index, std::map<std::string, std::string>::iterator contentLength);
         // void handleConnection(int clientSocket);
         class MyExceptio : public std::exception {};
 };
