@@ -6,15 +6,12 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/17 11:30:18 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/17 17:58:51 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-#include <unistd.h>
-#include <fstream>
 #include <sstream>
-#include <fcntl.h>
 #include <map>
 
 const char* greenColor = "\033[32m";
@@ -24,7 +21,16 @@ const char* resetColor = "\033[0m";
 
 int serverSocketFd;
 std::map<int, Client> clientsSocket;
+
 // atributes
+std::string trim(const std::string& str, const std::string& charsToTrim) {
+    size_t start = str.find_first_not_of(charsToTrim);
+    size_t end = str.find_last_not_of(charsToTrim);
+
+    if (start == std::string::npos || end == std::string::npos)
+        return std::string();
+    return str.substr(start, end - start + 1);
+}
 
 // void handelSignal(int signum) {
 //     for (size_t i = ZERO; i < clientsSocket.size(); i++)
@@ -34,38 +40,13 @@ std::map<int, Client> clientsSocket;
 //     exit(signum);
 // }
 
-void Server::sockCreat(void) {serverSocketFd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);}
-
-void Server::socketError( void ) {
-
-    int reuse = ONE;
-    if (setsockopt(serverSocketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
-        throw "setsockopt(SO_REUSEADDR) failed";
-    }
-}
-
-void Server::nonBlockingMode( void ) {
-
-    if (fcntl(serverSocketFd, F_SETFL, fcntl(serverSocketFd, F_GETFL, 0) | O_NONBLOCK) == FAILED) {
-        throw "calling fcntl";
-    }
-}
-
-void Server::sockBind( void ) {
-
-    if (bind(serverSocketFd, reinterpret_cast<struct sockaddr *>(&socketAddress), sizeof(socketAddress)) == FAILED) {
-        close(serverSocketFd);
-        throw "failed to bind server socket";
-    }
-}
-
-void Server::sockListen( void ) {
-
-    if (listen(serverSocketFd, 10) == FAILED) {
-        close(serverSocketFd);
-        throw "failed to make the socket at the listen mode!";
-    }
-}
+// std::vector<Client> ServerSocket::creatClientOBJ(void) {
+    
+//     std::vector<Client> clientsOBJ;
+//     for (std::vector<pollfd>::iterator it = tmpEvents.begin(); it != tmpEvents.end(); it++)
+//         clientsOBJ.push_back(Client(*it));
+//     return clientsOBJ;
+// }
 
 std::vector<pollfd> Server::getAllClientsFd(void) {
 
@@ -76,23 +57,10 @@ std::vector<pollfd> Server::getAllClientsFd(void) {
     return totalClientsPollFd;
 }
 
-std::vector<Client> Server::creatClientOBJ(void) {
-    
-    std::vector<Client> clientsOBJ;
-    for (std::vector<pollfd>::iterator it = tmpEvents.begin(); it != tmpEvents.end(); it++)
-        clientsOBJ.push_back(Client(*it));
-    return clientsOBJ;
-}
+Server::Server( void ) {}
+
+// int Server::getServerPort( void ) {return (serverPort);}
 // end atributes
-
-std::string trim(const std::string& str, const std::string& charsToTrim) {
-    size_t start = str.find_first_not_of(charsToTrim);
-    size_t end = str.find_last_not_of(charsToTrim);
-
-    if (start == std::string::npos || end == std::string::npos)
-        return std::string();
-    return str.substr(start, end - start + 1);
-}
 
 void Server::handleHttpRequest(int clientSocket) {
     // std::cout << greenColor << buffer << resetColor << std::endl;
@@ -157,13 +125,13 @@ void Server::handleHttpRequest(int clientSocket) {
     close(clientSocket);
 }
 
-bool Server::acceptNewConnection( void ) {
+bool Server::acceptNewConnection( ServerSocket server ) {
 
     int clientSocket;
     pollfd newClient;
-    int addrlen = sizeof(socketAddress);
+    int addrlen = sizeof(server.getSocketAddress());
     
-    if ((clientSocket = accept(serverSocketFd, (struct sockaddr *)(&socketAddress), (socklen_t *)&addrlen)) == FAILED) {
+    if ((clientSocket = accept(server.getServerSocketFd(), (struct sockaddr *)(&server.getSocketAddress()), (socklen_t *)&addrlen)) == FAILED) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             return false;
         }
@@ -237,42 +205,46 @@ void Server::POST(int index, std::map<std::string, std::string>::iterator conten
 }
 
 void Server::initializeSocket(std::vector<server_data> serverData) {
-
-    int sockPort = std::atoi(trim(serverData[ZERO].server[ZERO].second[ZERO], "\"").c_str());
     
-    this->sockCreat();
-    INIT_SOCKET(socketAddress, sockPort);
-    this->socketError();
-    this->nonBlockingMode();
-    this->sockBind();
-    this->sockListen();
-    std::cout << "server now is listening on port " << sockPort << std::endl;
+    for (std::vector<server_data>::iterator it = serverData.begin(); it != serverData.end(); it++) {
+        serverPort.push_back(std::atoi(trim(it->server[ZERO].second[ZERO], "\"").c_str()));
+    }
+    for (std::vector<int>::iterator it = serverPort.begin(); it != serverPort.end(); it++) {
+        virtualServer.push_back(ServerSocket(*it));
+        INIT_EVENT(events, virtualServer[virtualServer.size() - 1].getServerSocketFd());
+        std::cout << "server port is <:> " << *it << std::endl;
+        clientsSocket.insert(std::make_pair(virtualServer[virtualServer.size() - 1].getServerSocketFd(), Client(events)));
+    }
     // signal(SIGINT, Server::handelSignal);
     signal(SIGPIPE, SIG_IGN);
-    INIT_EVENT(events, serverSocketFd);
-    clientsSocket.insert(std::make_pair(serverSocketFd, Client(events)));
+    // while (true) {
+}
+
+void Server::runServer( void ) {
+
     while (true) {
-    tmpEvents = this->getAllClientsFd();
-    poll(tmpEvents.data(), tmpEvents.size(), FAILED);
-    for (size_t i = ZERO; i < tmpEvents.size(); i++) {
-        if (tmpEvents[i].fd == serverSocketFd) {
-            if (!this->acceptNewConnection())
-                continue;
-        } else {
-            if (!this->readFromClientSocketFd(i))
-                continue;
-            if ((tmpEvents[i].revents & POLLOUT)) {
-                    ft_parse_request(clientsSocket[tmpEvents[i].fd].getBuffer());
-                    size_t requestLenght = clientsSocket[tmpEvents[i].fd].getBuffer().find("\r\n\r\n"); // parcer
-                    std::map<std::string, std::string>::iterator contentLength = request_data.find("Content-Length");
-                    if (requestLenght != std::string::npos && contentLength == request_data.end())
-                        this->GET(i);
-                    if (contentLength != request_data.end() && (int)atoi(contentLength->second.c_str()) > ZERO)
-                        this->POST(i, contentLength);
-                    request_data.clear();
+        tmpEvents = this->getAllClientsFd();
+        poll(tmpEvents.data(), tmpEvents.size(), FAILED);
+        for (std::vector<ServerSocket>::iterator it = virtualServer.begin(); it != virtualServer.end(); it++) {
+            for (size_t i = ZERO; i < tmpEvents.size(); i++) {
+                if (tmpEvents[i].fd == it->getServerSocketFd()) {
+                    if (!this->acceptNewConnection(*it))
+                        continue;
+                } else {
+                    if (!this->readFromClientSocketFd(i))
+                        continue;
+                    if ((tmpEvents[i].revents & POLLOUT)) {
+                        ft_parse_request(clientsSocket[tmpEvents[i].fd].getBuffer());
+                        size_t requestLenght = clientsSocket[tmpEvents[i].fd].getBuffer().find("\r\n\r\n"); // parcer
+                        std::map<std::string, std::string>::iterator contentLength = request_data.find("Content-Length");
+                        if (requestLenght != std::string::npos && contentLength == request_data.end())
+                            this->GET(i);
+                        if (contentLength != request_data.end() && (int)atoi(contentLength->second.c_str()) > ZERO)
+                            this->POST(i, contentLength);
+                        request_data.clear();
+                    }
                 }
             }
         }
     }
-    close(serverSocketFd);
 }

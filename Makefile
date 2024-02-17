@@ -6,7 +6,7 @@
 #    By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/29 20:25:53 by hait-hsa          #+#    #+#              #
-#    Updated: 2024/02/16 20:53:42 by hait-hsa         ###   ########.fr        #
+#    Updated: 2024/02/17 17:07:56 by hait-hsa         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,8 +14,8 @@
 CC			=	c++
 CXXFLAGS	=	-Wall -Wextra -Werror -fsanitize=address -g
 
-SRC			=	main.cpp server/Server.cpp parsing/parser.cpp request_response/Response.cpp server/client/Client.cpp
-HEADERS		=	server/Server.hpp parsing/parser.hpp  request_response/Response.hpp server/client/Client.hpp
+SRC			=	main.cpp server/Server.cpp parsing/parser.cpp request_response/Response.cpp server/client/Client.cpp server/ServerSocket/ServerSocket.cpp
+HEADERS		=	server/Server.hpp parsing/parser.hpp request_response/Response.hpp server/client/Client.hpp server/ServerSocket/ServerSocket.hpp
 
 NAME		=	webserv
 
