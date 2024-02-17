@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/17 17:41:57 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/17 18:12:23 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,6 @@
 
 
 #define CHUNK_SIZE 1024
-#define ZERO 0
-#define ONE 1
-#define FAILED -1
 
 #define INIT_EVENT(ev, clinetSocket) \
         ev.fd = clinetSocket;         \
