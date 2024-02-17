@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/16 22:12:56 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/16 23:47:38 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,10 @@
 class Server : public Parser , public Response , public Client {
     private:
         pollfd events;
-        int serverSocketFd;
+        // int serverSocketFd;
         sockaddr_in socketAddress;
         std::vector<pollfd> tmpEvents;
+        // std::map<int, Client> clientsSocket;
     public:
         // virtual ~Server( void );
         // virtual ~Server();
@@ -70,6 +71,7 @@ class Server : public Parser , public Response , public Client {
         bool readFromClientSocketFd(int index);
         std::vector<pollfd> getAllClientsFd(void);
         std::vector<Client> creatClientOBJ(void);
+        static void handelSignal(int signum);
         // void handleConnection(int clientSocket);
         class MyExceptio : public std::exception {};
 };

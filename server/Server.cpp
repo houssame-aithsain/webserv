@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/16 23:18:13 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/17 10:31:37 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,17 +22,20 @@ const char* redColor = "\033[31m";
 const char* yellowColor = "\033[33m";
 const char* resetColor = "\033[0m";
 
+int count = 0;
+
 int serverSocketFd;
+// std::map<int, std::string> clientsBuffer;
 std::map<int, Client> clientsSocket;
 // atributes
 
-void handelSignal(int signum) {
-    for (size_t i = ZERO; i < clientsSocket.size(); i++)
-        close(clientsSocket[i].getFD());
-    close(serverSocketFd);
-    std::cout << "Sockets have been closed!" << std::endl;
-    exit(signum);
-}
+// void handelSignal(int signum) {
+//     for (size_t i = ZERO; i < clientsSocket.size(); i++)
+//         close(clientsSocket[i].getFD());
+//     close(serverSocketFd);
+//     std::cout << "Sockets have been closed!" << std::endl;
+//     exit(signum);
+// }
 
 void Server::sockCreat(void) {serverSocketFd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);}
 
@@ -176,7 +179,6 @@ bool Server::acceptNewConnection( void ) {
         }
         std::cout << "connection has been done successfully" << std::endl;
         INIT_EVENT(newClient, clientSocket);
-
         clientsSocket.insert(std::make_pair(newClient.fd, Client(newClient)));
     }
     return true;
@@ -185,8 +187,8 @@ bool Server::acceptNewConnection( void ) {
 int Server::receiveData(int clientSocket) {
 
     char chunk[CHUNK_SIZE];
-
     bzero(chunk, sizeof(chunk));
+    std::cout << redColor << clientSocket << resetColor << std::endl;
     int bytesRead = recv(clientSocket, chunk, sizeof(chunk) - ONE, ZERO);
     if (bytesRead == FAILED) {
         if (errno == EAGAIN || errno == EWOULDBLOCK)
@@ -199,19 +201,12 @@ int Server::receiveData(int clientSocket) {
     std::cout << greenColor << bytesRead << resetColor << std::endl;
     chunk[bytesRead] = ZERO;
     clientsSocket[clientSocket].appendStr(chunk);
-    // std::map<int, std::string>::iterator it = clientsBuffer.find(clientSocket);
-    // if (it != clientsBuffer.end())
-    //     clientsBuffer[clientSocket].append(chunk);
-    // else
-    //     clientsBuffer.insert(std::make_pair(clientSocket, chunk));
-    // exit(0);
     return bytesRead;
 }
 
 bool Server::readFromClientSocketFd(int index) {
 
     int requestByteSize;
-
     if (tmpEvents[index].revents & POLLIN) {
         requestByteSize = receiveData(tmpEvents[index].fd);
         if (requestByteSize == FAILED) {
@@ -238,21 +233,21 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
     this->sockBind();
     this->sockListen();
     std::cout << "server now is listening on port " << sockPort << std::endl;
-    signal(SIGINT, handelSignal);
+    // signal(SIGINT, Server::handelSignal);
     signal(SIGPIPE, SIG_IGN);
     INIT_EVENT(events, serverSocketFd);
-    clientsSocket.insert(std::make_pair(serverSocketFd, events));
+    clientsSocket.insert(std::make_pair(serverSocketFd, Client(events)));
     while (true) {
     tmpEvents = this->getAllClientsFd();
     poll(tmpEvents.data(), tmpEvents.size(), FAILED);
     // clientsSocket = tmpEvents;
     for (size_t i = ZERO; i < tmpEvents.size(); i++) {
-        if (tmpEvents[i].fd == serverSocketFd && !this->acceptNewConnection())
+        if (tmpEvents[i].fd == serverSocketFd) {
+            if (!this->acceptNewConnection())
                 continue;
-        else {
+        } else {
             if (!this->readFromClientSocketFd(i))
                 continue;
-            // std::map<int, std::string>::iterator it = clientsBuffer.find(tmpEvents[i].fd);
             if ((tmpEvents[i].revents & POLLOUT)) {
                 ft_parse_request(clientsSocket[tmpEvents[i].fd].getBuffer());
                 size_t requestLenght = clientsSocket[tmpEvents[i].fd].getBuffer().find("\r\n\r\n");
@@ -274,6 +269,7 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
                 }
             }
         }
+        count++;
     }
 }
     close(serverSocketFd);
