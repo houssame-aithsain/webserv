@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 11:40:05 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/17 17:52:57 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/17 18:23:17 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ ServerSocket::ServerSocket( int port ) : sockPort(port) {
 
     sockCreat();
     INIT_SOCKET(socketAddress, sockPort);
-    socketError();
+    reuseSocket();
     nonBlockingMode();
     sockBind();
     sockListen();
@@ -28,7 +28,7 @@ void ServerSocket::sockCreat(void) {serverSocketFd = socket(AF_INET, SOCK_STREAM
 
 int ServerSocket::getServerSocketFd( void ) {return (serverSocketFd);}
 
-void ServerSocket::socketError( void ) {
+void ServerSocket::reuseSocket( void ) {
 
     int reuse = ONE;
     if (setsockopt(serverSocketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {

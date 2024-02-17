@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/17 18:12:23 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/17 18:37:27 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@
 #include <string>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "../parsing/parser.hpp"
-#include "../request_response/Response.hpp"
+#include "../../parsing/parser.hpp"
+#include "../../request_response/Response.hpp"
 #include <csignal>
 #include <sys/event.h>
 #include <limits.h>
@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #include <fstream>
 #include <unistd.h>
-#include "serverSocket/ServerSocket.hpp"
+#include "../serverSocket/ServerSocket.hpp"
 
 
 #define CHUNK_SIZE 1024
@@ -53,7 +53,6 @@ class Server : public Parser , public Response, public ServerSocket, public Clie
         // virtual ~Server( void );
         // virtual ~Server();
         Server( void );
-        Server( int sockPort );
         // server( const server & other );
         // server operator=(const server & other);
         void runServer( void );
