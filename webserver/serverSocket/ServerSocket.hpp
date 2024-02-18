@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 11:40:00 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/17 19:43:59 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/18 12:24:04 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,9 @@
 #define ZERO 0
 #define ONE 1
 #define FAILED -1
+
+#define blueColor "\033[34m"
+#define resetColor "\033[0m"
 
 #define INIT_SOCKET(socketAddress, PORT)     \
     socketAddress.sin_family = AF_INET;       \

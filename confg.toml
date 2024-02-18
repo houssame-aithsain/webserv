@@ -33,7 +33,7 @@
 		autoindex = "on"
 		_clientMaxBodySize = "10m"
 [[server]]
-	port = "1338"
+	port = "1339"
 	host = "10.0.0.1"
 	root = "www"
 	server_name = ["example1.com", "example22.com", "example3.com"]
@@ -49,3 +49,4 @@
 		error_page = ["502", "/404.html"]
 		autoindex = "on"
 		_clientMaxBodySize = "10m"
+

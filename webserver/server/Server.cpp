@@ -6,18 +6,13 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/17 18:30:41 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/18 12:26:37 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include <sstream>
 #include <map>
-
-const char* greenColor = "\033[32m";
-const char* redColor = "\033[31m";
-const char* yellowColor = "\033[33m";
-const char* resetColor = "\033[0m";
 
 std::map<int, Client> clientSocket;
 
@@ -146,6 +141,8 @@ int Server::receiveData(int cSock) {
         if (errno == EAGAIN || errno == EWOULDBLOCK)
             return bytesRead;
         else {
+            std::cout << redColor << cSock << resetColor << std::endl;
+            throw "file descriptor error";
             perror("recv");
             return FAILED;
         }
@@ -170,6 +167,7 @@ bool Server::readFromClientSocketFd(int index) {
             close(tmpEvents[index].fd);
             clientSocket[tmpEvents[index].fd].clearBuffer();
         }
+        tmpEvents[index].revents = 0;
     }
     return true;
 }
@@ -199,12 +197,23 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
     }
     for (std::vector<int>::iterator it = serverPort.begin(); it != serverPort.end(); it++) {
         virtualServer.push_back(ServerSocket(*it));
-        INIT_EVENT(events, virtualServer[virtualServer.size() - 1].getServerSocketFd());
-        std::cout << "server port is <:> " << *it << std::endl;
-        clientSocket.insert(std::make_pair(virtualServer[virtualServer.size() - ONE].getServerSocketFd(), Client(events)));
+        INIT_EVENT(events, virtualServer.back().getServerSocketFd());
+        std::cout << redColor << "server port" << greenColor << " <" << redColor << ":" << greenColor << "> " << yellowColor << *it << resetColor << std::endl;
+        std::cout << greenColor << "server   fd" << redColor << " <" << greenColor << ":" << redColor << "> " << yellowColor << virtualServer.back().getServerSocketFd() << resetColor << std::endl;
+        std::cout << "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
+        clientSocket.insert(std::make_pair(virtualServer.back().getServerSocketFd(), Client(events)));
     }
     // signal(SIGINT, Server::handelSignal);
     signal(SIGPIPE, SIG_IGN);
+}
+
+bool Server::isServer( int cSock ) {
+
+    for (std::vector<ServerSocket>::iterator it = virtualServer.begin(); it != virtualServer.end(); it++) {
+        if (it->getServerSocketFd() == cSock)
+            return true;
+    }
+    return false;
 }
 
 void Server::runServer( void ) {
@@ -218,9 +227,9 @@ void Server::runServer( void ) {
                     if (!this->acceptNewConnection(*it))
                         continue;
                 } else {
-                    if (!this->readFromClientSocketFd(i))
-                        continue;
-                    if ((tmpEvents[i].revents & POLLOUT)) {
+                    if (!isServer(tmpEvents[i].fd) && !this->readFromClientSocketFd(i))
+                            continue;
+                    if (!isServer(tmpEvents[i].fd) && tmpEvents[i].revents & POLLOUT) {
                         ft_parse_request(clientSocket[tmpEvents[i].fd].getBuffer());
                         size_t requestLenght = clientSocket[tmpEvents[i].fd].getBuffer().find("\r\n\r\n"); // parcer
                         std::map<std::string, std::string>::iterator contentLength = request_data.find("Content-Length");
@@ -235,3 +244,5 @@ void Server::runServer( void ) {
         }
     }
 }
+
+// i need to set a bytereader for each client *

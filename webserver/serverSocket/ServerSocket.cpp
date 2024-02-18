@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 11:40:05 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/17 18:23:17 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/18 12:24:11 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void ServerSocket::sockListen( void ) {
         close(serverSocketFd);
         throw "failed to make the socket at the listen mode!";
     }
-    std::cout << "server now is listening on port " << sockPort << std::endl;
+    std::cout << blueColor << "server now is listening on port "<< resetColor << sockPort << std::endl;
 }
 
 sockaddr_in& ServerSocket::getSocketAddress( void ) {return (socketAddress);}

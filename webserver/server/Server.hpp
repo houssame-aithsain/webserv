@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/17 18:37:27 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/18 12:24:00 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,9 @@
 #include <unistd.h>
 #include "../serverSocket/ServerSocket.hpp"
 
+#define greenColor "\033[32m"
+#define redColor "\033[31m"
+#define yellowColor "\033[33m"
 
 #define CHUNK_SIZE 1024
 
@@ -69,5 +72,6 @@ class Server : public Parser , public Response, public ServerSocket, public Clie
         int getServerSocketFd( void );
         // void handleConnection(int clientSocket);
         std::vector<pollfd> getAllClientsFd(void);
+        bool isServer( int cSock );
         class MyExceptio : public std::exception {};
 };
