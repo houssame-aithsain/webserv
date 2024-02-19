@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/18 12:24:00 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/18 21:02:45 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,5 +73,6 @@ class Server : public Parser , public Response, public ServerSocket, public Clie
         // void handleConnection(int clientSocket);
         std::vector<pollfd> getAllClientsFd(void);
         bool isServer( int cSock );
+        void Sent(int cSock);
         class MyExceptio : public std::exception {};
 };
