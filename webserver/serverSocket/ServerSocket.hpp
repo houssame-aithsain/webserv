@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 11:40:00 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/19 20:27:32 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/20 17:17:41 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,5 @@ class ServerSocket {
         void sockListen( void );
         int getServerSocketFd( void );
         sockaddr_in& getSocketAddress( void );
-        int getSockPort( void );
+        int getSockPort( void ); // wledat dya had l class server socket!!
 };
-// hello
