@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/20 12:26:46 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/22 18:05:47 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class Server : public Parser , public Response, public ServerSocket, public Clie
     private:
         pollfd events;
         // int serverSocketFd;
+        std::vector<ServerSocket> virtualServer;
         std::vector<int> serverPort;
         std::vector<pollfd> tmpEvents;
         // std::map<int, Client> clientsSocket;
@@ -64,14 +65,14 @@ class Server : public Parser , public Response, public ServerSocket, public Clie
         bool acceptNewConnection( ServerSocket server );
         bool readFromClientSocketFd(int index);
         std::vector<Client> creatClientOBJ(void);
-        // void handelSignal(int signum);
+        static void handelSignal(int signum);
         void GET( int index );
         void POST(int index, std::map<std::string, std::string>::iterator contentLength);
         int getServerPort( void );
         int getServerSocketFd( void );
+        void Sent(int cSock);
         // void handleConnection(int clientSocket);
         std::vector<pollfd> getAllClientsFd(void);
         bool isServer( int cSock );
-        void Sent(int cSock);
         class MyExceptio : public std::exception {};
 };

@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/21 10:33:25 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/22 22:46:38 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,8 @@
 #include <map>
 
 std::map<int, Client> clientSocket;
-std::vector<ServerSocket> virtualServer;
 
-void handelSignal(int signum) {
-    for (size_t i = ZERO; i < clientSocket.size(); i++)
-        close(clientSocket[i].getFD());
-    for (size_t i = ZERO; i < virtualServer.size(); i++)
-        close(virtualServer[i].getServerSocketFd());
-    std::cout << "Sockets have been closed!" << std::endl;
-    exit(signum);
-}
+int count = 0;
 
 // atributes
 std::string trim(const std::string& str, const std::string& charsToTrim) {
@@ -36,6 +28,13 @@ std::string trim(const std::string& str, const std::string& charsToTrim) {
     return str.substr(start, end - start + 1);
 }
 
+// void handelSignal(int signum) {
+//     for (size_t i = ZERO; i < clientSocket.size(); i++)
+//         close(clientSocket[i].getFD());
+//     close(serverSocketFd);
+    // std::cout << "Sockets have been closed!" << std::endl;
+//     exit(signum);
+// }
 
 std::vector<pollfd> Server::getAllClientsFd(void) {
 
@@ -43,7 +42,7 @@ std::vector<pollfd> Server::getAllClientsFd(void) {
 
     for (std::map<int, Client>::iterator it = clientSocket.begin(); it != clientSocket.end(); it++) {
         totalClientsPollFd.push_back(it->second.getPollFd());
-        // std::cout << "map fds: " << it->second.getFD() << std::endl;
+        // std::cout << redColor << totalClientsPollFd.back().fd << resetColor << std::endl;
     }
     return totalClientsPollFd;
 }
@@ -52,31 +51,27 @@ Server::Server( void ) {}
 
 void Server::Sent(int cSock) {
 
-    ssize_t bytesSent = send(cSock, clientSocket[cSock].getBytesToSend().c_str() + clientSocket[cSock].getBytesWrite(), clientSocket[cSock].getRemainingBytes(), 0);
+    ssize_t bytesSent = send(cSock, clientSocket[cSock].getResponseBuffer().c_str() + clientSocket[cSock].getTotalBytesSent(), clientSocket[cSock].getRemainingBytes(), 0);
     if (bytesSent == FAILED) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
         } else {
             perror("send");
+            // throw "sent";
             // exit(11);
         }
     }
-    clientSocket[cSock].appendBytesWrite(bytesSent);
+    clientSocket[cSock].appendTotalBytesSent(bytesSent);
     clientSocket[cSock].unappendRemainingBytes(bytesSent);
-    if (clientSocket[cSock].getBytesToSend().length() == clientSocket[cSock].getBytesWrite()) {
-        std::cout << blueColor << "client fd " << resetColor << "{" << cSock << "} " << blueColor << "closed" << resetColor << std::endl; 
-        close(cSock);
-        clientSocket[cSock].resetBytesWrite();
+    // clientSocket[cSock].getPollFd().revents = 0;
+    if (!clientSocket[cSock].getRemainingBytes()) {
+        // close(cSock);
         clientSocket[cSock].resetRemainingBytes();
-        clientSocket[cSock].clearBytesToSend();
+        clientSocket[cSock].resetTotalBytesSent();
         clientSocket[cSock].clearBuffer();
-        clientSocket[cSock].resetBytesRead();
-        clientSocket[cSock].clearBytesToSend();
+        clientSocket[cSock].clearResponseBuffer();
         // clientSocket.erase(cSock);
-        std::cout << redColor << "+-+-+-+-client request finished!-+-+-+-+" << resetColor << std::endl;
     }
-    // clientSocket[cSock].resetBytesWrite();
-    // clientSocket[cSock].resetRemainingBytes();
-    std::cout << greenColor << "server is sending data to client fd " << redColor << " <" << greenColor << ":" << redColor << "> " << yellowColor << cSock << resetColor << std::endl;
+    // std::cout << greenColor << "server is sending data to client fd " << redColor << " <" << greenColor << ":" << redColor << "> " << yellowColor << cSock << resetColor << std::endl;
 }
 
 void Server::handleHttpRequest(int cSock) {
@@ -91,12 +86,16 @@ void Server::handleHttpRequest(int cSock) {
         std::ifstream file("." + requestedResource, std::ios::binary);
         if (!file.is_open()) {
             std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
-            std::cout << "NOT FOUND!!!!" << std::endl;
+            // std::cout << "NOT FOUND!!!!" << std::endl;
             send(cSock, response.c_str(), response.length(), 0);
-            // close(cSock);
+            close(cSock);
+            clientSocket[cSock].resetRemainingBytes();
+            clientSocket[cSock].resetTotalBytesSent();
+            clientSocket[cSock].clearBuffer();
+            clientSocket[cSock].clearResponseBuffer();
             // clientSocket.erase(cSock);
         } else {
-            // Read the entire content of the file into a string
+            // Read the entire content of the file into a string        
             std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
             file.close();
 
@@ -114,26 +113,18 @@ void Server::handleHttpRequest(int cSock) {
             httpResponse += "Content-Type: " + content_type + "\r\n";
             httpResponse += "Content-Length: " + std::to_string(content.size()) + "\r\n";
             httpResponse += "\r\n" + content;
-            // if ((clientSocket[cSock].getBytesWrite() == clientSocket[cSock].getBytesToSend().length() || clientSocket[cSock].getBytesToSend().empty())) {
-            // std::cout << greenColor << "request sent buffer now is fulling..." << resetColor << std::endl;
-            clientSocket[cSock].clearBuffer();
-            clientSocket[cSock].resetBytesWrite();
-            clientSocket[cSock].resetRemainingBytes();
-            clientSocket[cSock].clearBytesToSend();
-            clientSocket[cSock].resetBytesRead();
-            clientSocket[cSock].setBytesToSend(httpResponse);
-            clientSocket[cSock].appendRemainingBytes(httpResponse.length());
-            // }
+
             // Send the HTTP response
-            // size_t totalBytesSent = 0;
-            // size_t remainingBytes = httpResponse.length();
-            
-            //     totalBytesSent += static_cast<size_t>(bytesSent);
-            //     remainingBytes -= static_cast<size_t>(bytesSent);
-            // }
+            clientSocket[cSock].resetRemainingBytes();
+            clientSocket[cSock].resetTotalBytesSent();
+            clientSocket[cSock].clearBuffer();
+            clientSocket[cSock].clearResponseBuffer();
+            clientSocket[cSock].fillResponseBuffer(httpResponse);
+            clientSocket[cSock].setRemainingBytes(httpResponse.length());
         }
     }
     // std::cout << "######################################################\n\n";
+    // close(cSock);
 }
 
 bool Server::acceptNewConnection( ServerSocket server ) {
@@ -151,11 +142,28 @@ bool Server::acceptNewConnection( ServerSocket server ) {
         int status = fcntl(cSock, F_SETFL, fcntl(cSock, F_GETFL, 0) | O_NONBLOCK);
         if (status == FAILED) {
             perror("calling fcntl");
+            // throw "calling fcntl";
         }
-        std::cout << yellowColor << "connection has been done successfully" << resetColor << std::endl;
+        // std::cout << "connection has been done successfully" << std::endl;
         INIT_EVENT(newClient, cSock);
+        // for (std::map<int, Client>::iterator it = clientSocket.begin(); it != clientSocket.end(); it++) {
+        //     if (it->second.getFD() == newClient.fd) {
+        //         Client cc = clientSocket[newClient.fd];
+        //         std::cout << redColor << "client socket closed before the client gets all of its data !" << resetColor << std::endl;
+        //         std::cout << "remaining bytes : " << clientSocket[newClient.fd].getRemainingBytes() << std::endl;
+        //         std::cout << "total bytes sent : " << clientSocket[newClient.fd].getTotalBytesSent() << std::endl;
+        //         std::cout << "buffer request : " << clientSocket[newClient.fd].getBuffer() << std::endl;
+        //         std::cout << "buffer responce : " << clientSocket[newClient.fd].getBuffer() << std::endl;
+        //         // usleep(2000);
+        //         cc.setPollfd(newClient);
+        //         clientSocket.insert(std::make_pair(newClient.fd, cc));
+        //         return true;
+        //         // close(newClient.fd);
+        //         // exit(0);
+        //         // return true;
+        //     }
+        // }
         clientSocket.insert(std::make_pair(newClient.fd, Client(newClient)));
-        // clientSocket.erase(server.getServerSocketFd());
     }
     return true;
 }
@@ -171,10 +179,13 @@ int Server::receiveData(int cSock) {
         if (errno == EAGAIN || errno == EWOULDBLOCK)
             return bytesRead;
         else {
+            // std::cout << redColor << cSock << resetColor << std::endl;
             perror("recv");
+            // throw "file descriptor error";
             return FAILED;
         }
     }
+    // std::cout << greenColor << bytesRead << resetColor << std::endl;
     chunk[bytesRead] = ZERO;
     clientSocket[cSock].appendStr(chunk);
     return bytesRead;
@@ -191,39 +202,33 @@ bool Server::readFromClientSocketFd(int index) {
         }
         perror("recv");
     } else if (requestByteSize == 0) {
-        // close(tmpEvents[index].fd);
-        clientSocket[tmpEvents[index].fd].clearBuffer();
-        clientSocket[tmpEvents[index].fd].resetBytesRead();
-        clientSocket[tmpEvents[index].fd].resetBytesWrite();
+        close(tmpEvents[index].fd);
         clientSocket[tmpEvents[index].fd].resetRemainingBytes();
-        clientSocket[tmpEvents[index].fd].clearBytesToSend();
-        // clientSocket.erase(tmpEvents[index].fd);
-    } else {
-        clientSocket[tmpEvents[index].fd].appendBytesRead(requestByteSize);
+        clientSocket[tmpEvents[index].fd].resetTotalBytesSent();
+        clientSocket[tmpEvents[index].fd].clearBuffer();
+        clientSocket[tmpEvents[index].fd].clearResponseBuffer();
     }
-    // tmpEvents[index].revents = 0;
-    std::cout << redColor << "client is reading...." << resetColor << std::endl;
+    // tmpEvents[index].revents = ZERO;
+    std::cout << redColor << "receving" <<resetColor << std::endl;
     return true;
 }
 
 void Server::GET( int index ) {
 
-    std::cout << redColor << "GET" << resetColor << std::endl;
+    // std::cout << redColor << "GET" << resetColor << std::endl;
     // std::cout << redColor << tmpEvents[index].fd << resetColor << std::endl;
     handleHttpRequest(tmpEvents[index].fd);
-    clientSocket[tmpEvents[index].fd].clearBuffer();
 }
 
-void Server::POST(int index, std::map<std::string, std::string>::iterator contentLength) {
+// void Server::POST(int index, std::map<std::string, std::string>::iterator contentLength) {
 
-    std::cout << greenColor << "POST" << resetColor << std::endl;
-    if ((int)atoi(contentLength->second.c_str()) <= clientSocket[tmpEvents[index].fd].getBytesRead()) {
-        std::cout << greenColor << clientSocket[tmpEvents[index].fd].getBuffer() << resetColor << std::endl;
-        // handleHttpRequest(tmpEvents[index].fd);
-        clientSocket[tmpEvents[index].fd].clearBuffer();
-        close(tmpEvents[index].fd);
-    }
-}
+    // std::cout << greenColor << "POST" << resetColor << std::endl;
+//     if ((int)atoi(contentLength->second.c_str()) <= (int)clientSocket[tmpEvents[index].fd].getBuffer().size()) {
+        // std::cout << redColor << clientSocket[tmpEvents[index].fd].getBuffer() << resetColor << std::endl;
+//         handleHttpRequest(tmpEvents[index].fd);
+//         clientSocket[tmpEvents[index].fd].clearBuffer();
+//     }
+// }
 
 void Server::initializeSocket(std::vector<server_data> serverData) {
     
@@ -238,7 +243,7 @@ void Server::initializeSocket(std::vector<server_data> serverData) {
         std::cout << "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
         clientSocket.insert(std::make_pair(virtualServer.back().getServerSocketFd(), Client(events)));
     }
-    signal(SIGINT, handelSignal);
+    // signal(SIGINT, Server::handelSignal);
     signal(SIGPIPE, SIG_IGN);
 }
 
@@ -255,11 +260,18 @@ void Server::runServer( void ) {
 
     while (true) {
         tmpEvents = this->getAllClientsFd();
-        poll(tmpEvents.data(), tmpEvents.size(), FAILED);
+        ////////
+        // for (size_t i = 0; i < tmpEvents.size(); i++) {
+        //     std::cout << tmpEvents[i].fd << std::endl;
+        // }
+        // if (count == 370)
+        //     exit(0);
+        ///////
+        poll(tmpEvents.data(), tmpEvents.size(), 5000);
         for (std::vector<ServerSocket>::iterator it = virtualServer.begin(); it != virtualServer.end(); it++) {
-            std::cout << greenColor << "inside the server socket" << resetColor << std::endl;
             for (size_t i = ZERO; i < tmpEvents.size(); i++) {
-                //****************************************************************************************//
+                std::cout << yellowColor << "POLLFD" << resetColor << std::endl;
+                //********************************************
                 int cS = tmpEvents[i].fd;
                 sockaddr_in clientAddress;
                 socklen_t addrLen = sizeof(clientAddress);
@@ -267,38 +279,40 @@ void Server::runServer( void ) {
                 if (getsockname(cS, reinterpret_cast<sockaddr*>(&clientAddress), &addrLen) == 0) {
                     clientPort = ntohs(clientAddress.sin_port);
                 }
-                //****************************************************************************************//
-                if (tmpEvents[i].fd == it->getServerSocketFd() && clientPort == it->getSockPort()) {
-                    std::cout << "new connection" << std::endl;
-                    if (!this->acceptNewConnection(*it)) {
-                        std::cout << "accepte continue"  << std::endl;
-                        // continue;
-                    }
-                } else if (tmpEvents[i].revents & POLLIN) {
-                        if (!this->readFromClientSocketFd(i)) {
-                            std::cout << redColor << "read continue" << resetColor << std::endl;
+                //********************************************
+                //--------------------------------------------
+                // std::cout << redColor << "client socket closed before the client gets all of its data !" << resetColor << std::endl;
+                // std::cout << "remaining bytes : " << clientSocket[tmpEvents[i].fd].getRemainingBytes() << std::endl;
+                // std::cout << "total bytes sent : " << clientSocket[tmpEvents[i].fd].getTotalBytesSent() << std::endl;
+                // std::cout << "buffer request : " << clientSocket[tmpEvents[i].fd].getBuffer() << std::endl;
+                // std::cout << "buffer responce : " << clientSocket[tmpEvents[i].fd].getBuffer() << std::endl;
+                // usleep(1000);
+                //++++++++++++++++++++++++++++++++++++++++++++
+                if (tmpEvents[i].fd == it->getServerSocketFd()) {
+                    this->acceptNewConnection(*it);
+                    continue;
+                } else if (clientPort == it->getServerPort() && !isServer(tmpEvents[i].fd) && !clientSocket[tmpEvents[i].fd].getRemainingBytes()) {
+                    if (tmpEvents[i].revents & POLLIN) {
+                        std::cout << yellowColor << "POLLIN" << resetColor << std::endl;
+                        if (!this->readFromClientSocketFd(i))
                             continue;
-                        }
-                    }
-                    else if (tmpEvents[i].revents & POLLOUT && clientPort == it->getSockPort()) {
-                        std::cout << "pollout section" << std::endl;
+                    } else if (tmpEvents[i].revents & POLLOUT) {
                         ft_parse_request(clientSocket[tmpEvents[i].fd].getBuffer());
                         size_t requestLenght = clientSocket[tmpEvents[i].fd].getBuffer().find("\r\n\r\n"); // parcer
                         std::map<std::string, std::string>::iterator contentLength = request_data.find("Content-Length");
-                        if (requestLenght != std::string::npos && contentLength == request_data.end() && !clientSocket[tmpEvents[i].fd].getRemainingBytes()) {
-
+                        if (requestLenght != std::string::npos && contentLength == request_data.end()) {
                             this->GET(i);
                         }
-                        if (clientSocket[tmpEvents[i].fd].getRemainingBytes() && (tmpEvents[i].revents & POLLOUT)) {
-                            std::cout << yellowColor << "about to send data" << resetColor << std::endl;
-                            Sent(tmpEvents[i].fd);
-                        }
-                        if (contentLength != request_data.end() && (int)atoi(contentLength->second.c_str()) > ZERO)
-                            this->POST(i, contentLength);
                         request_data.clear();
+                        std::cout << yellowColor << "POLLOUT" << resetColor << std::endl;
+                        // if (contentLength != request_data.end() && (int)atoi(contentLength->second.c_str()) > ZERO)
+                        //     this->POST(i, contentLength);
                     }
+                } if (tmpEvents[i].revents & POLLOUT && clientSocket[tmpEvents[i].fd].getRemainingBytes()) {
+                    std::cout << greenColor << "sending..." << resetColor << std::endl;
+                    Sent(tmpEvents[i].fd);
                 }
             }
         }
     }
-
+}

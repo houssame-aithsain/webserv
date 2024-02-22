@@ -6,60 +6,74 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/16 20:18:04 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/18 21:56:13 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/22 21:51:26 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
+#include <unistd.h>
+#include <stdio.h>
 
-Client::~Client( void ) {}
+Client::~Client( void ) {
+    std::cout << "client killed!!" << std::endl;
+    // usleep(100000);
+    // exit(0);
+}
 
-Client::Client( void ) : bytesRead(0), remainingBytes(0) {}
+Client::Client( void ) : remainingBytes(0), totalBytesSent(0) {}
 
-Client::Client( pollfd ev) : event(ev), bytesRead(0), remainingBytes(0), totalBytesSend(0) {}
+Client::Client( pollfd ev) : event(ev), remainingBytes(0), totalBytesSent(0) {}
 
 void Client::clearBuffer( void ) {requestBuffer.clear();}
 
-pollfd Client::getPollFd( void ) {return (event);}
+pollfd& Client::getPollFd( void ) {return (event);}
 
 int Client::getFD( void ) {return (event.fd);}
+
+// requestbuffer
 
 std::string Client::getBuffer( void ) {return (requestBuffer);}
 
 void Client::appendStr(char *chunk) {requestBuffer += chunk;}
 
+//
+
 void Client::changePollFd(pollfd me) {event = me;}
 
-// bytes read
+// response
 
-int Client::getBytesRead( void ) {return (bytesRead);}
+void Client::fillResponseBuffer(std::string response) {responseBuffer = response;}
 
-void Client::appendBytesRead( int bytes) {bytesRead += bytes;}
+std::string Client::getResponseBuffer( void ) {return (responseBuffer);}
 
-void Client::resetBytesRead( void ) {bytesRead = 0;}
+void Client::clearResponseBuffer( void ) {responseBuffer.clear();}
 
-// bytes write
+// response counters
 
-size_t Client::getBytesWrite( void ) {return (totalBytesSend);}
+void Client::setRemainingBytes( size_t bytes ) {remainingBytes = bytes;}
 
-void Client::appendBytesWrite( size_t bytes) {totalBytesSend += bytes;}
-
-void Client::resetBytesWrite( void ) {totalBytesSend = 0;}
-
-// remaining bytes
-
-size_t Client::getRemainingBytes( void ) {return (remainingBytes);}
-
-void Client::appendRemainingBytes( size_t bytes) {remainingBytes = bytes;}
-
-void Client::unappendRemainingBytes( size_t bytes) {remainingBytes -= bytes;}
+void Client::unappendRemainingBytes( size_t bytes ) {remainingBytes -= bytes;}
 
 void Client::resetRemainingBytes( void ) {remainingBytes = 0;}
 
-// bytes to Send
+size_t Client::getRemainingBytes( void ) {return (remainingBytes);}
 
-std::string Client::getBytesToSend( void ) {return (HTTPrequest);}
+// totalBytesSent
 
-void Client::setBytesToSend( std::string bytes ) {HTTPrequest = bytes;}
+void Client::appendTotalBytesSent( size_t bytes ) {totalBytesSent += bytes;}
 
-void Client::clearBytesToSend( void ) {HTTPrequest.clear();}
+void Client::resetTotalBytesSent( void ) {totalBytesSent = 0;}
+
+size_t Client::getTotalBytesSent( void ) {return (totalBytesSent);}
+
+Client & Client::operator=(const Client & other) {
+    
+    event = other.event;
+    requestBuffer = other.requestBuffer;
+    responseBuffer = other.responseBuffer;
+    remainingBytes = other.remainingBytes;
+    totalBytesSent = other.totalBytesSent;
+    return (*this);
+}
+
+void Client::setPollfd(const pollfd pfd) {event = pfd;}

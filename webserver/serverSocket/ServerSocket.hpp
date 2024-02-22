@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 11:40:00 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/20 17:17:41 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/21 11:55:53 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,6 @@
 
 #define blueColor "\033[34m"
 #define resetColor "\033[0m"
-#define BG_COLOR_BLUE "\033[48;5;21m"
-
 
 #define INIT_SOCKET(socketAddress, PORT)     \
     socketAddress.sin_family = AF_INET;       \
@@ -46,5 +44,5 @@ class ServerSocket {
         void sockListen( void );
         int getServerSocketFd( void );
         sockaddr_in& getSocketAddress( void );
-        int getSockPort( void ); // wledat dya had l class server socket!!
+        int getServerPort( void );
 };

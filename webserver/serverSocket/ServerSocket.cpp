@@ -6,13 +6,11 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 11:40:05 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/19 20:35:40 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/21 11:33:08 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerSocket.hpp"
-#include <arpa/inet.h>
-#include <sys/socket.h>
 
 ServerSocket::ServerSocket( void ) {}
 
@@ -59,9 +57,9 @@ void ServerSocket::sockListen( void ) {
         close(serverSocketFd);
         throw "failed to make the socket at the listen mode!";
     }
-    std::cout << BG_COLOR_BLUE << "server now is listening on port " << sockPort << resetColor << std::endl;
+    std::cout << blueColor << "server now is listening on port "<< resetColor << sockPort << std::endl;
 }
 
 sockaddr_in& ServerSocket::getSocketAddress( void ) {return (socketAddress);}
 
-int ServerSocket::getSockPort( void ) {return (ntohs(this->socketAddress.sin_port));}
+int ServerSocket::getServerPort( void ) {return (ntohs(socketAddress.sin_port));}
