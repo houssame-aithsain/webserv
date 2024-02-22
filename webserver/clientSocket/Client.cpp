@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/16 20:18:04 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/22 21:51:26 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/22 23:57:05 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,3 +77,9 @@ Client & Client::operator=(const Client & other) {
 }
 
 void Client::setPollfd(const pollfd pfd) {event = pfd;}
+
+std::string Client::getPostBuffer( void ) {return (Postbuffer);}
+
+void Client::appendPostBuffer( std::string pb ) {Postbuffer += pb;}
+
+void Client::clearPostBuffer( void ) {Postbuffer.clear();}

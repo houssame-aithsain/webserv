@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/16 20:18:01 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/22 18:23:31 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/22 23:55:35 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ class Client {
         pollfd event;
         std::string requestBuffer;
         std::string responseBuffer;
+        std::string Postbuffer;
         int remainingBytes;
         int totalBytesSent;
     public:
@@ -46,5 +47,8 @@ class Client {
         void resetTotalBytesSent( void );
         size_t getTotalBytesSent( void );
         //
+        std::string getPostBuffer( void );
+        void appendPostBuffer( std::string );
+        void clearPostBuffer( void );
         Client & operator=(const Client & other);
 };

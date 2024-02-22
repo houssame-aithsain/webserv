@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/22 22:46:38 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/23 00:23:30 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ void Server::Sent(int cSock) {
         // close(cSock);
         clientSocket[cSock].resetRemainingBytes();
         clientSocket[cSock].resetTotalBytesSent();
-        clientSocket[cSock].clearBuffer();
+        // clientSocket[cSock].clearBuffer();
         clientSocket[cSock].clearResponseBuffer();
         // clientSocket.erase(cSock);
     }
@@ -215,20 +215,25 @@ bool Server::readFromClientSocketFd(int index) {
 
 void Server::GET( int index ) {
 
-    // std::cout << redColor << "GET" << resetColor << std::endl;
+    std::cout << redColor << "GET" << resetColor << std::endl;
     // std::cout << redColor << tmpEvents[index].fd << resetColor << std::endl;
     handleHttpRequest(tmpEvents[index].fd);
+    clientSocket[tmpEvents[index].fd].clearBuffer();
 }
 
-// void Server::POST(int index, std::map<std::string, std::string>::iterator contentLength) {
+void Server::POST(int index, std::map<std::string, std::string>::iterator contentLength) {
 
-    // std::cout << greenColor << "POST" << resetColor << std::endl;
-//     if ((int)atoi(contentLength->second.c_str()) <= (int)clientSocket[tmpEvents[index].fd].getBuffer().size()) {
-        // std::cout << redColor << clientSocket[tmpEvents[index].fd].getBuffer() << resetColor << std::endl;
-//         handleHttpRequest(tmpEvents[index].fd);
-//         clientSocket[tmpEvents[index].fd].clearBuffer();
-//     }
-// }
+    std::cout << greenColor << "POST" << resetColor << std::endl;
+    clientSocket[tmpEvents[index].fd].appendPostBuffer(clientSocket[tmpEvents[index].fd].getBuffer());
+    if ((int)atoi(contentLength->second.c_str()) <= (int)clientSocket[tmpEvents[index].fd].getPostBuffer().size()) {
+        std::cout << redColor << clientSocket[tmpEvents[index].fd].getBuffer() << resetColor << std::endl;
+        // handleHttpRequest(tmpEvents[index].fd);
+        // send(tmpEvents[index].fd, response.c_str(), response.length(), 0);
+        close(tmpEvents[index].fd);
+        clientSocket[tmpEvents[index].fd].clearPostBuffer();
+    }
+    clientSocket[tmpEvents[index].fd].clearBuffer();
+}
 
 void Server::initializeSocket(std::vector<server_data> serverData) {
     
@@ -267,10 +272,10 @@ void Server::runServer( void ) {
         // if (count == 370)
         //     exit(0);
         ///////
-        poll(tmpEvents.data(), tmpEvents.size(), 5000);
+        poll(tmpEvents.data(), tmpEvents.size(), FAILED);
         for (std::vector<ServerSocket>::iterator it = virtualServer.begin(); it != virtualServer.end(); it++) {
             for (size_t i = ZERO; i < tmpEvents.size(); i++) {
-                std::cout << yellowColor << "POLLFD" << resetColor << std::endl;
+                // std::cout << yellowColor << "POLLFD" << resetColor << std::endl;
                 //********************************************
                 int cS = tmpEvents[i].fd;
                 sockaddr_in clientAddress;
@@ -291,22 +296,26 @@ void Server::runServer( void ) {
                 if (tmpEvents[i].fd == it->getServerSocketFd()) {
                     this->acceptNewConnection(*it);
                     continue;
-                } else if (clientPort == it->getServerPort() && !isServer(tmpEvents[i].fd) && !clientSocket[tmpEvents[i].fd].getRemainingBytes()) {
-                    if (tmpEvents[i].revents & POLLIN) {
-                        std::cout << yellowColor << "POLLIN" << resetColor << std::endl;
+                } else if (clientPort == it->getServerPort() && !isServer(tmpEvents[i].fd)) {
+                    if (tmpEvents[i].revents & POLLIN ) {
+                        // std::cout << yellowColor << "POLLIN" << resetColor << std::endl;
                         if (!this->readFromClientSocketFd(i))
                             continue;
-                    } else if (tmpEvents[i].revents & POLLOUT) {
+                        ft_parse_request(clientSocket[tmpEvents[i].fd].getBuffer());
+                        size_t requestLenght = clientSocket[tmpEvents[i].fd].getBuffer().find("\r\n\r\n"); // parcer
+                        std::map<std::string, std::string>::iterator contentLength = request_data.find("Content-Length");
+                        if (requestLenght != std::string::npos && contentLength != request_data.end() && (int)atoi(contentLength->second.c_str()) > ZERO)
+                            this->POST(i, contentLength);
+                        request_data.clear();
+                    } else if (tmpEvents[i].revents & POLLOUT && !clientSocket[tmpEvents[i].fd].getRemainingBytes()) {
                         ft_parse_request(clientSocket[tmpEvents[i].fd].getBuffer());
                         size_t requestLenght = clientSocket[tmpEvents[i].fd].getBuffer().find("\r\n\r\n"); // parcer
                         std::map<std::string, std::string>::iterator contentLength = request_data.find("Content-Length");
                         if (requestLenght != std::string::npos && contentLength == request_data.end()) {
                             this->GET(i);
                         }
+                        // std::cout << yellowColor << "POLLOUT" << resetColor << std::endl;
                         request_data.clear();
-                        std::cout << yellowColor << "POLLOUT" << resetColor << std::endl;
-                        // if (contentLength != request_data.end() && (int)atoi(contentLength->second.c_str()) > ZERO)
-                        //     this->POST(i, contentLength);
                     }
                 } if (tmpEvents[i].revents & POLLOUT && clientSocket[tmpEvents[i].fd].getRemainingBytes()) {
                     std::cout << greenColor << "sending..." << resetColor << std::endl;
