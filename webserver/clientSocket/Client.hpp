@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/16 20:18:01 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/22 23:55:35 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/23 15:35:15 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ class Client {
         std::string Postbuffer;
         int remainingBytes;
         int totalBytesSent;
+        size_t responseBodyCounter;
     public:
         ~Client( void );
         Client( void );
@@ -51,4 +52,8 @@ class Client {
         void appendPostBuffer( std::string );
         void clearPostBuffer( void );
         Client & operator=(const Client & other);
+        // responseBody
+        void initResponseBodyCounter( size_t count);
+        void resetResponseBodyCounter( void );
+        size_t getResponseBodyCounter( void );
 };

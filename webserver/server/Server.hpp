@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/22 18:05:47 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/23 20:05:35 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ class Server : public Parser , public Response, public ServerSocket, public Clie
         std::vector<Client> creatClientOBJ(void);
         static void handelSignal(int signum);
         void GET( int index );
-        void POST(int index, std::map<std::string, std::string>::iterator contentLength);
+        void POST(int index);
         int getServerPort( void );
         int getServerSocketFd( void );
         void Sent(int cSock);

@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/16 20:18:04 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/22 23:57:05 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/23 20:20:31 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,11 @@
 #include <unistd.h>
 #include <stdio.h>
 
-Client::~Client( void ) {
-    std::cout << "client killed!!" << std::endl;
-    // usleep(100000);
-    // exit(0);
-}
+Client::~Client( void ) {}
 
 Client::Client( void ) : remainingBytes(0), totalBytesSent(0) {}
 
-Client::Client( pollfd ev) : event(ev), remainingBytes(0), totalBytesSent(0) {}
+Client::Client( pollfd ev) : event(ev), remainingBytes(0), totalBytesSent(0), responseBodyCounter(0) {}
 
 void Client::clearBuffer( void ) {requestBuffer.clear();}
 
@@ -83,3 +79,11 @@ std::string Client::getPostBuffer( void ) {return (Postbuffer);}
 void Client::appendPostBuffer( std::string pb ) {Postbuffer += pb;}
 
 void Client::clearPostBuffer( void ) {Postbuffer.clear();}
+
+// response counter
+
+void Client::initResponseBodyCounter( size_t count ) {responseBodyCounter = count;}
+
+void Client::resetResponseBodyCounter( void ) {responseBodyCounter = 0;}
+
+size_t Client::getResponseBodyCounter( void ) {return (responseBodyCounter);}
