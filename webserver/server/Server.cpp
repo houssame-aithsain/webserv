@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlaazouz <jlaazouz@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/23 22:47:26 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/24 15:21:20 by jlaazouz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,6 +78,10 @@ void Server::handleHttpRequest(int cSock) {
     // std::cout << greenColor << buffer << resetColor << std::endl;
     // std::cout << "######################################################\n";
 
+    std::map<std::string , std::string>::iterator it;
+    for (it = this->request_data.begin() ; it != this->request_data.end() ; it++)
+        std::cout << it->first << " " << it->second << std::endl;
+    
     if (request_data["Method"] == "GET") {
         std::string requestedResource = request_data["Asset"];
         if (requestedResource == "/")
@@ -308,11 +312,15 @@ void Server::runServer( void ) {
                         }
                         request_data.clear();
                     } else if (tmpEvents[i].revents & POLLOUT && !clientSocket[tmpEvents[i].fd].getRemainingBytes()) {
+                        // int i = 0;
+                        // std::cout << "that the i value : " << i << std::endl;
                         ft_parse_request(clientSocket[tmpEvents[i].fd].getBuffer());
                         size_t requestLenght = clientSocket[tmpEvents[i].fd].getBuffer().find("\r\n\r\n"); // parcer
                         std::map<std::string, std::string>::iterator contentLength = request_data.find("Content-Length");
                         if (requestLenght != std::string::npos && contentLength == request_data.end()) {
-                            this->GET(i);
+                            std::cout << "In get \n";
+                            // hnaya
+                            this->GET(i); 
                         }
                         request_data.clear();
                     }

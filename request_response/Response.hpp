@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlaazouz <jlaazouz@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/11 18:36:03 by gothmane          #+#    #+#             */
-/*   Updated: 2024/02/14 18:48:03 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/24 15:10:01 by jlaazouz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,17 @@
 #include <limits.h>
 #include <cstring>
 
+#define LOG(x) std::cout << x << std::endl
+
 class Response
 {
-    public:
+    protected :
+        std::string _method;
+        std::string _path;
+        std::string _htmlVersion;
         std::map<std::string, std::string> request_data;
+    
+    public:
         Response();
         ~Response();
         std::string ft_getPageToRender(std::vector<std::pair<std::string, std::vector<std::string> > > ParsedRequest);

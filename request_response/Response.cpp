@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlaazouz <jlaazouz@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/11 18:36:05 by gothmane          #+#    #+#             */
-/*   Updated: 2024/02/15 15:34:56 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/02/24 15:53:10 by jlaazouz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,41 +66,21 @@ void Response::ft_parse_request(std::string request)
     std::string getrequestLine;
     int index = 0;
     int checker_body = 0;
+    std::string key;
+    std::string value;
+    
     while (std::getline(getrequestStream, getrequestLine, '\n')) 
-    {
-        if (index == 0)
-        {
-            //get method
-            std::vector<std::string>  new_v;
-            int next = getrequestLine.find(" ");
-            new_v.push_back(getrequestLine.substr(0, next));
-            this->request_data["Method"] = new_v[0];
-
-            //get assets
-            new_v.clear();
-            int new_next = getrequestLine.find(" " , next + 1);
-            new_v.push_back(getrequestLine.substr((next + 1), (new_next - (next + 1))));
-            this->request_data["Asset"] = new_v[0];
-            std::cout << this->request_data["Asset"] << std::endl;
-            //get type
-            new_v.clear();
-            new_v.push_back(getrequestLine.substr(new_next + 1, ((getrequestLine.size() - 2) - new_next)));
-            this->request_data["Type"] = new_v[0];
-            index++;
-        }
+    { 
+        std::istringstream lines(getrequestLine);
+        if (index++ == 0)
+            lines >> this->request_data["Method"] >> this->request_data["Asset"] >> this->request_data["Type"];
         else if (getrequestLine != "\r")
         {
-            std::cout << getrequestLine << std::endl;
-            int i1 = getrequestLine.find(":");
-            std::string key = getrequestLine.substr(0, i1);
-            std::string value = getrequestLine.substr((i1 + 1), ((getrequestLine.size() - 2) - i1));
-
-            if (key != "")
+            lines >> key;
+            if (key.length() > 0)
             {
-                std::vector<std::string>  new_v;
-
-                new_v.push_back(ft_trim(value, " \t\n\""));
-                this->request_data[key] = new_v[0];
+                key = key.substr(0, key.length() - 1);
+                this->request_data[key] = ft_trim(getrequestLine.substr(key.length() + 2, getrequestLine.length()), " \t\n\"");
             }
         }
         else
@@ -109,37 +89,38 @@ void Response::ft_parse_request(std::string request)
             break ;
         }
     }
-    if (checker_body == 1)
-    {
-        std::string content((std::istreambuf_iterator<char>(getrequestStream)), std::istreambuf_iterator<char>());
-        std::cout << "######## Start of the Body ####### \n";
-        if (this->request_data["Method"] == "POST")
-        {
-            std::stringstream file_name(content);
-            std::string line;
-            char buf[1024];
-            if (this->request_data["Transfer-encoding"] == "chunked")
-            {
-                getline(file_name, line);
-                int nbr = hexToDecimal(line);
+    // POST PARSING REQUEST CHUNCKED
+    // if (checker_body == 1)
+    // {
+    //     std::string content((std::istreambuf_iterator<char>(getrequestStream)), std::istreambuf_iterator<char>());
+    //     std::cout << "######## Start of the Body ####### \n";
+    //     if (this->request_data["Method"] == "POST")
+    //     {
+    //         std::stringstream file_name(content);
+    //         std::string line;
+    //         char buf[1024];
+    //         if (this->request_data["Transfer-encoding"] == "chunked")
+    //         {
+    //             getline(file_name, line);
+    //             int nbr = hexToDecimal(line);
 
-                while (nbr != 0)
-                {
-                    bzero(buf,1024);
-                    file_name.read(buf, nbr);
-                    file_name.get();
-                    file_name.get();
-                    getline(file_name, line);
-                    nbr = hexToDecimal(line);
-                }
-            }
-            this->request_data["body"] = content;
-        }
-        else
-            this->request_data["body"] = content;
-        std::cout << this->request_data["body"] << std::endl;
-        std::cout << "\n######## End of the Body ####### \n";
-    }
+    //             while (nbr != 0)
+    //             {
+    //                 bzero(buf,1024);
+    //                 file_name.read(buf, nbr);
+    //                 file_name.get();
+    //                 file_name.get();
+    //                 getline(file_name, line);
+    //                 nbr = hexToDecimal(line);
+    //             }
+    //         }
+    //         this->request_data["body"] = content;
+    //     }
+    //     else
+    //         this->request_data["body"] = content;
+    //     std::cout << this->request_data["body"] << std::endl;
+    //     std::cout << "\n######## End of the Body ####### \n";
+    // }
 
 }
 
@@ -179,6 +160,10 @@ void Response::handleHttpRequest(int clientSocket, char* httpRequest)
     std::cout << "Query = " << requestedQuery << std::endl;
     std::cout << "###################################\n";
     // end data
+
+  
+    
+
     if (requestedResource == "/")
         requestedResource = "/index.html";
     std::ifstream file("."+requestedResource, std::ios::binary);
