@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/03/11 22:49:04 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/11 23:37:34 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,10 +26,6 @@ std::string trim(const std::string& str, const std::string& charsToTrim) {
     return str.substr(start, end - start + 1);
 }
 
-void Server::callCGI( int index ) {
-    CGI::extractClientContent(clientSocket[tmpEvents[index].fd]);
-}
-
 // void handelSignal(int signum) {
 //     for (size_t i = ZERO; i < clientSocket.size(); i++)
 //         close(clientSocket[i].getFD());
@@ -40,33 +36,6 @@ void Server::callCGI( int index ) {
 
 
 Server::Server( void ) {}
-
-bool Server::Sent(int cSock, int index) {
-
-    ssize_t bytesSent = send(cSock, clientSocket[cSock].getResponseBuffer().c_str() + clientSocket[cSock].getTotalBytesSent(), clientSocket[cSock].getRemainingBytes(), 0);
-    if (bytesSent == FAILED || !bytesSent) { 
-        if (bytesSent == FAILED) {
-            perror("send");
-            // throw "sent";
-            // exit(11);
-        }
-        close(cSock);
-        clientSocket.erase(cSock);
-        tmpEvents.erase(tmpEvents.begin() + index);
-        return false;
-    }
-    clientSocket[cSock].appendTotalBytesSent(bytesSent);
-    clientSocket[cSock].unappendRemainingBytes(bytesSent);
-    if (!clientSocket[cSock].getRemainingBytes()) {
-        close(cSock);
-        clientSocket[cSock].resetRemainingBytes();
-        clientSocket[cSock].resetTotalBytesSent();
-        clientSocket[cSock].clearResponseBuffer();
-    }
-    std::cout << greenColor << "sending..." << resetColor << std::endl;
-    return true;
-    // std::cout << greenColor << "server is sending data to client fd " << redColor << " <" << greenColor << ":" << redColor << "> " << yellowColor << cSock << resetColor << std::endl;
-}
 
 void Server::handleHttpRequest(int cSock) {
     // std::cout << greenColor << buffer << resetColor << std::endl;
@@ -120,65 +89,74 @@ void Server::handleHttpRequest(int cSock) {
     // close(cSock);
 }
 
-bool Server::acceptNewConnection( ServerSocket server ) {
+void Server::callCGI( int index ) {CGI::extractClientContent(clientSocket[tmpEvents[index].fd]);}
 
-    int cSock;
-    pollfd newClient;
-    int addrlen = sizeof(server.getSocketAddress());
+int Server::getClientPort(int index) {
     
-    if ((cSock = accept(server.getServerSocketFd(), (struct sockaddr *)(&server.getSocketAddress()), (socklen_t *)&addrlen)) == FAILED) {
-        // if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            return false;
-        // }
-        // perror("accept()");
-    } else {
-        int status = fcntl(cSock, F_SETFL, fcntl(cSock, F_GETFL, 0) | O_NONBLOCK);
-        if (status == FAILED) {
-            perror("calling fcntl");
-            // throw "calling fcntl";
-        }
-        // std::cout << "connection has been done successfully" << std::endl;
-        INIT_EVENT(newClient, cSock);
-        std::cout << "client has been accepted!" << std::endl;
-        tmpEvents.push_back(newClient);
-        clientSocket.insert(std::make_pair(newClient.fd, Client(newClient)));
+    int cS = tmpEvents[index].fd;
+    sockaddr_in clientAddress;
+    socklen_t addrLen = sizeof(clientAddress);
+    int clientPort = 0x0000;
+
+    if (getsockname(cS, reinterpret_cast<sockaddr*>(&clientAddress), &addrLen) == 0) {
+        clientPort = ntohs(clientAddress.sin_port);
     }
-    return true;
+    return clientPort;
 }
 
-bool Server::receiveData(int cSock, int index) {
+bool Server::isServer( int cSock ) {
 
-    char chunk[CHUNK_SIZE];
+    for (std::vector<ServerSocket>::iterator it = virtualServer.begin(); it != virtualServer.end(); it++) {
+        if (it->getServerSocketFd() == cSock)
+            return true;
+    }
+    return false;
+}
 
-    bzero(chunk, sizeof(chunk));
-    // std::cout << redColor << cSock << resetColor << std::endl;
-    int bytesRead = recv(cSock, chunk, sizeof(chunk) - ONE, ZERO);
-    if (bytesRead == FAILED) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK)
-            return false;
-        else {
-            // std::cout << redColor << cSock << resetColor << std::endl;
-            perror("recv");
-            // throw "file descriptor error";
-            return false;
+void Server::initializeSocket(std::vector<server_data> serverData) {
+    
+    for (std::vector<server_data>::iterator it = serverData.begin(); it != serverData.end(); it++) {
+        serverPort.push_back(std::atoi(trim(it->server[ZERO].second[ZERO], "\"").c_str()));
+    }
+    for (std::vector<int>::iterator it = serverPort.begin(); it != serverPort.end(); it++) {
+        virtualServer.push_back(ServerSocket(*it));
+        INIT_EVENT(events, virtualServer.back().getServerSocketFd());
+        std::cout << redColor << "server port" << greenColor << " <" << redColor << ":" << greenColor << "> " << yellowColor << *it << resetColor << std::endl;
+        std::cout << greenColor << "server   fd" << redColor << " <" << greenColor << ":" << redColor << "> " << yellowColor << virtualServer.back().getServerSocketFd() << resetColor << std::endl;
+        std::cout << "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
+        tmpEvents.push_back(events);
+    }
+    // signal(SIGINT, Server::handelSignal); i should close all sockets fds
+    signal(SIGPIPE, SIG_IGN);
+}
+
+bool Server::Sent(int cSock, int index) {
+
+    ssize_t bytesSent = send(cSock, clientSocket[cSock].getResponseBuffer().c_str() + clientSocket[cSock].getTotalBytesSent(), clientSocket[cSock].getRemainingBytes(), 0);
+    if (bytesSent == FAILED || !bytesSent) { 
+        if (bytesSent == FAILED) {
+            perror("send");
         }
-    } else if (!bytesRead) {
         close(cSock);
         clientSocket.erase(cSock);
         tmpEvents.erase(tmpEvents.begin() + index);
         return false;
     }
-    // std::cout << greenColor << bytesRead << resetColor << std::endl;
-    chunk[bytesRead] = ZERO;
-    clientSocket[cSock].appendStr(chunk);
-    std::cout << redColor << "receving" <<resetColor << std::endl;
+    clientSocket[cSock].appendTotalBytesSent(bytesSent);
+    clientSocket[cSock].unappendRemainingBytes(bytesSent);
+    if (!clientSocket[cSock].getRemainingBytes()) {
+        close(cSock);
+        clientSocket[cSock].resetRemainingBytes();
+        clientSocket[cSock].resetTotalBytesSent();
+        clientSocket[cSock].clearResponseBuffer();
+    }
+    std::cout << greenColor << "sending..." << resetColor << std::endl;
     return true;
 }
 
 void Server::GET( int index ) {
 
     std::cout << redColor << "GET" << resetColor << std::endl;
-    // std::cout << redColor << tmpEvents[index].fd << resetColor << std::endl;
     handleHttpRequest(tmpEvents[index].fd);
 }
 
@@ -201,52 +179,62 @@ void Server::POST(int index) {
     }
 }
 
-void Server::initializeSocket(std::vector<server_data> serverData) {
-    
-    for (std::vector<server_data>::iterator it = serverData.begin(); it != serverData.end(); it++) {
-        serverPort.push_back(std::atoi(trim(it->server[ZERO].second[ZERO], "\"").c_str()));
+bool Server::receiveData(int cSock, int index) {
+
+    char chunk[CHUNK_SIZE];
+
+    bzero(chunk, sizeof(chunk));
+    int bytesRead = recv(cSock, chunk, sizeof(chunk) - ONE, ZERO);
+    if (bytesRead == FAILED) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK)
+            return false;
+        else {
+            perror("recv");
+            return false;
+        }
+    } else if (!bytesRead) {
+        close(cSock);
+        clientSocket.erase(cSock);
+        tmpEvents.erase(tmpEvents.begin() + index);
+        return false;
     }
-    for (std::vector<int>::iterator it = serverPort.begin(); it != serverPort.end(); it++) {
-        virtualServer.push_back(ServerSocket(*it));
-        INIT_EVENT(events, virtualServer.back().getServerSocketFd());
-        std::cout << redColor << "server port" << greenColor << " <" << redColor << ":" << greenColor << "> " << yellowColor << *it << resetColor << std::endl;
-        std::cout << greenColor << "server   fd" << redColor << " <" << greenColor << ":" << redColor << "> " << yellowColor << virtualServer.back().getServerSocketFd() << resetColor << std::endl;
-        std::cout << "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
-        tmpEvents.push_back(events);
-    }
-    // signal(SIGINT, Server::handelSignal);
-    signal(SIGPIPE, SIG_IGN);
+    chunk[bytesRead] = ZERO;
+    clientSocket[cSock].appendStr(chunk);
+    std::cout << redColor << "receving" <<resetColor << std::endl;
+    return true;
 }
 
-bool Server::isServer( int cSock ) {
+bool Server::acceptNewConnection( ServerSocket server ) {
 
-    for (std::vector<ServerSocket>::iterator it = virtualServer.begin(); it != virtualServer.end(); it++) {
-        if (it->getServerSocketFd() == cSock)
-            return true;
+    int cSock;
+    pollfd newClient;
+    int addrlen = sizeof(server.getSocketAddress());
+    
+    if ((cSock = accept(server.getServerSocketFd(), (struct sockaddr *)(&server.getSocketAddress()), (socklen_t *)&addrlen)) == FAILED) {
+        return false;
+    } else {
+        int status = fcntl(cSock, F_SETFL, fcntl(cSock, F_GETFL, 0) | O_NONBLOCK);
+        if (status == FAILED) {
+            perror("calling fcntl");
+        }
+        INIT_EVENT(newClient, cSock);
+        std::cout << "client has been accepted!" << std::endl;
+        tmpEvents.push_back(newClient);
+        clientSocket.insert(std::make_pair(newClient.fd, Client(newClient)));
     }
-    return false;
+    return true;
 }
 
 void Server::runServer( void ) {
 
     bool isPost;
     while (true) {
-    // Use poll to wait for events
     poll(tmpEvents.data(), tmpEvents.size(), -1);
 
     for (std::vector<ServerSocket>::iterator it = virtualServer.begin(); it != virtualServer.end(); it++) { // loop over every server
         for (size_t i = 0; i < tmpEvents.size(); i++) { // loop every event
-            //************************************************************************************
-                int cS = tmpEvents[i].fd;
-                sockaddr_in clientAddress;
-                socklen_t addrLen = sizeof(clientAddress);
-                int clientPort = 0x0000;
-                if (getsockname(cS, reinterpret_cast<sockaddr*>(&clientAddress), &addrLen) == 0) {
-                    clientPort = ntohs(clientAddress.sin_port);
-                }
-                if (clientPort != it->getServerPort() && i)
-                    continue;
-            //************************************************************************************
+            if (getClientPort(i) != it->getServerPort() && i) // check if the client is in the same server port
+                continue;
             isPost = false;
             if (tmpEvents[i].fd == it->getServerSocketFd()) {
                 if (!this->acceptNewConnection(*it)) {
