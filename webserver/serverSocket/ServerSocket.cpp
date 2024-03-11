@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 11:40:05 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/21 11:33:08 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/10 22:01:22 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ void ServerSocket::sockBind( void ) {
 
 void ServerSocket::sockListen( void ) {
 
-    if (listen(serverSocketFd, 10) == FAILED) {
+    if (listen(serverSocketFd, 1000) == FAILED) {
         close(serverSocketFd);
         throw "failed to make the socket at the listen mode!";
     }

@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/23 20:05:35 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/11 22:49:12 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@
 #include <fstream>
 #include <unistd.h>
 #include "../serverSocket/ServerSocket.hpp"
+#include "../CGI/CGI.hpp"
 
 #define greenColor "\033[32m"
 #define redColor "\033[31m"
@@ -44,7 +45,7 @@
 
 #define SOCKETFAILED "Error binding socket!"
 
-class Server : public Parser , public Response, public ServerSocket, public Client {
+class Server : public Parser , public Response, public ServerSocket, public Client, public CGI {
     private:
         pollfd events;
         // int serverSocketFd;
@@ -61,18 +62,17 @@ class Server : public Parser , public Response, public ServerSocket, public Clie
         void runServer( void );
         void initializeSocket(  std::vector<server_data> serverData );
         void handleHttpRequest(int clientSocket);
-        int receiveData(int index);
+        bool receiveData(int cSock, int index);
         bool acceptNewConnection( ServerSocket server );
-        bool readFromClientSocketFd(int index);
         std::vector<Client> creatClientOBJ(void);
         static void handelSignal(int signum);
         void GET( int index );
         void POST(int index);
         int getServerPort( void );
         int getServerSocketFd( void );
-        void Sent(int cSock);
+        bool Sent(int cSock, int index);
         // void handleConnection(int clientSocket);
-        std::vector<pollfd> getAllClientsFd(void);
         bool isServer( int cSock );
+        void callCGI( int index );
         class MyExceptio : public std::exception {};
 };

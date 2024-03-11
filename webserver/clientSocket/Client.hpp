@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/16 20:18:01 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/23 15:35:15 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/11 22:28:06 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,4 +56,8 @@ class Client {
         void initResponseBodyCounter( size_t count);
         void resetResponseBodyCounter( void );
         size_t getResponseBodyCounter( void );
+
+        //clear all
+        void clear( void );
+        void erase( void );
 };

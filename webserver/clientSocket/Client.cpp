@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/16 20:18:04 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/02/23 20:20:31 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/11 22:30:46 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 Client::~Client( void ) {}
 
-Client::Client( void ) : remainingBytes(0), totalBytesSent(0) {}
+Client::Client( void ) : remainingBytes(0), totalBytesSent(0), responseBodyCounter(0) {}
 
 Client::Client( pollfd ev) : event(ev), remainingBytes(0), totalBytesSent(0), responseBodyCounter(0) {}
 
@@ -87,3 +87,14 @@ void Client::initResponseBodyCounter( size_t count ) {responseBodyCounter = coun
 void Client::resetResponseBodyCounter( void ) {responseBodyCounter = 0;}
 
 size_t Client::getResponseBodyCounter( void ) {return (responseBodyCounter);}
+
+void Client::clear( void ) {
+
+    close(event.fd);
+    requestBuffer.clear();
+    responseBuffer.clear();
+    Postbuffer.clear();
+    remainingBytes = 0;
+    totalBytesSent = 0;
+    responseBodyCounter = 0;
+}
