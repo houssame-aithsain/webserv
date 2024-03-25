@@ -3,12 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/16 20:18:01 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/03/11 22:28:06 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/24 22:13:41 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+
+#pragma once
+
 
 #include <iostream>
 #include <sys/poll.h>
@@ -31,7 +35,7 @@ class Client {
         void setPollfd(const pollfd pfd);
         int getFD( void );
         std::string getBuffer( void );
-        void appendStr(char *chunk);
+        void appendStr(char *chunk, size_t bytesSize) ;
         void changePollFd(pollfd me);
         // response
         void fillResponseBuffer(std::string response);

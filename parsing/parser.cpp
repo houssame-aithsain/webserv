@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:13 by gothmane          #+#    #+#             */
-/*   Updated: 2024/02/10 18:40:21 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/03/25 02:24:27 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ bool ft_check_quotes_for_single_data(std::string value)
         std::cout << "No value found !\n";
         return (false);
     }
-    if (value.size() > 1)
+    if (value.size() >= 1)
     {
         if (ft_count_special_char(value, '\"') == 2 && ft_count_special_char(value, '\'') == 2)
         {
@@ -215,7 +215,7 @@ void Parser::ft_read_nd_parse(std::string fileName)
         {
             if (ft_trim(line, " \"\t") == "[[server]]")
             {
-                std::cout << "SERRRRRVER \n";
+                // std::cout << "SERRRRRVER \n";
                 if (server_side > 0)
                 {
                     wrapper.push_back(data);
@@ -239,7 +239,6 @@ void Parser::ft_read_nd_parse(std::string fileName)
                 if (line.find("=") == std::string::npos)
                     continue;
                 std::string key = ft_trim((line.substr(0, line.find("="))), " \"\t");
-                std::cout << "key = " << key << std::endl;
                 if (key == "")
                     continue;
                 std::vector<std::string> value;
@@ -260,6 +259,11 @@ void Parser::ft_read_nd_parse(std::string fileName)
                 if (j >= data.location.size()) {
                     data.location.resize(j+1);
                 }
+                if (key == "prefix" && value[0][value[0].size() - 1] != '/' )
+                {
+                    value[0].append("/");
+                    // std::cout << "APPENDED >> " <<  value[0] << "\n";
+                }
                 data.location.at(j).push_back(std::make_pair(key, value));
             }
         }
@@ -269,10 +273,124 @@ void Parser::ft_read_nd_parse(std::string fileName)
     else
         std::cout << "Unable to open file\n";
 
+    check_for_default_location();
+    replace_prefix_with_alias();
     // ft_print_data();
 }
 
 std::vector<server_data> Parser::getWrapper( void ) {return (wrapper);}
+
+void    Parser::check_for_default_location(void)
+{
+    size_t i = 0;
+    int checker = 0;
+    std::vector<std::pair<std::string, std::vector<std::string> > >  location;
+
+    for (; i < this->wrapper.size(); i++)
+    {
+        for (size_t l = 0; l < wrapper[i].location.size(); l++)
+        {
+            size_t s = 0;
+            for (; s < wrapper[i].location[l].size(); s++)
+            {
+                if (wrapper[i].location[l][s].first == "prefix" 
+                    && ft_trim(wrapper[i].location[l][s].second[0], " \"\'\t") == "/")
+                {
+                    
+                    checker = 1;
+                    break;
+                }
+            }
+        }
+        if (checker == 0)
+        {
+            std::vector<std::string> v;
+
+            v.push_back("/");
+            location.push_back(std::make_pair("prefix", v));
+            std::cout << "PUSHED default\n";
+            wrapper[i].location.push_back(location);
+        }
+    }
+}
+
+std::vector<std::string> Parser::get_data_from_conf(std::string &port, std::string prefix, std::string key, int bv)
+{
+    size_t i = 0;
+    size_t k = 0; 
+    size_t checker = 0;
+    std::vector<std::string> default_value;
+    std::vector<std::string> empty_for_empty;
+    
+    // std::cout << "in parsing config data\n";
+    // std::cout << "the port >> " << port << "\n";
+    // std::cout << "the prefix >> " << prefix << "\n";
+    // std::cout << "the key >> " << key << "\n";
+    if (prefix[prefix.size() - 1] != '/')
+        prefix.append("/");
+    for (; i < wrapper.size(); i++)
+    {
+        for (size_t j = 0; j < wrapper[i].server.size(); j++)
+        {
+            checker = 0;
+            if (ft_trim(wrapper[i].server[j].first, " \"\'\t") == "port" 
+                && ft_trim(wrapper[i].server[j].second[0], " \"\'\t") == port)
+            {
+                k = j;
+                checker = 1;
+                for (size_t e = 0; e < wrapper[i].server.size(); e++)
+                    if (ft_trim(wrapper[i].server[e].first, " \"\'\t") == ft_trim(key, " \"\'\t"))
+                        default_value = wrapper[i].server[e].second;
+                break;
+            }
+        }
+        if (!bv && !default_value.empty())
+        {
+            return (default_value);
+        }
+        if (checker == 1 && bv)
+        {
+
+            for (size_t l = 0; l < wrapper[i].location.size(); l++)
+            {
+                size_t s = 0;
+                for (; s < wrapper[i].location[l].size(); s++)
+                {
+                    // std::cout << "THE KEY >> => " << ft_trim(wrapper[i].location[l][k].second[0], " \"\'\t") << std::endl;
+                    // std::cout << "THE PREFIX >> => " << prefix << std::endl;
+                    // std::cout << "THE KEY LOOKING FOR >> => " << key << std::endl;
+                    // std::cout << "THE INDEX FOR LOCATION >> => " << l << std::endl;
+                    // std::cout << "THE key FOR LOCATION >> => " << wrapper[i].location[l][k].first << std::endl;
+                    if (wrapper[i].location[l][s].first == "prefix" 
+                        && ft_trim(wrapper[i].location[l][s].second[0], " \"\'\t") == prefix)
+                    {
+                        
+                        for (size_t k = 0; k < wrapper[i].location[l].size(); k++)
+                        {
+                           
+                            if (wrapper[i].location[l][k].first == key)
+                            {
+                                
+                                return (wrapper[i].location[l][k].second);
+                            }
+                        }
+                        break;
+                    }
+
+                }
+
+            }
+                           
+                if (!default_value.empty())
+                {
+                    // std::cout << ft_trim(default_value[0], " \"\'\t") << std::endl;
+                    return (default_value);
+                }
+        }
+
+    }
+    return (empty_for_empty);
+}
 
 // typedef std::vector <server_data> serv_data;
 // typedef std::vector<std::pair<std::string, std::vector<std::string> > > s1;
@@ -294,3 +412,77 @@ std::vector<server_data> Parser::getWrapper( void ) {return (wrapper);}
 //         }
 //     }
 // }
+
+
+std::vector<std::string> Parser::get_server_locations(std::string &port)
+{
+    size_t i = 0;
+    size_t k = 0;
+    int checker = 0;
+    std::vector<std::string> default_value;
+    std::vector<std::string> prefixes;
+    
+    for (; i < wrapper.size(); i++)
+    {
+        for (size_t j = 0; j < wrapper[i].server.size(); j++)
+        {
+            checker = 0;
+            if (wrapper[i].server[j].first == "port" && ft_trim(wrapper[i].server[j].second[0], " \"\'\t") == port)
+            {
+                k = j;
+                checker = 1;
+                break;
+            }
+        }
+        if (checker == 1)
+        {
+            for (size_t l = 0; l < wrapper[i].location.size(); l++)
+            {
+                size_t s = 0;
+                for (; s < wrapper[i].location[l].size(); s++)
+                {
+                    if (wrapper[i].location[l][s].first == "prefix" )
+                    {
+                        prefixes.push_back(wrapper[i].location[l][s].second[0]);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return (prefixes);
+}
+
+
+void Parser::replace_prefix_with_alias(void)
+{
+    size_t i = 0;
+    std::vector<std::string> default_value;
+    
+    for (; i < wrapper.size(); i++)
+    {
+        for (size_t j = 0; j < wrapper[i].server.size(); j++)
+        {
+            for (size_t l = 0; l < wrapper[i].location.size(); l++)
+            {
+                size_t s = 0;
+                for (; s < wrapper[i].location[l].size(); s++)
+                {
+                    if (wrapper[i].location[l][s].first == "alias" )
+                    {
+                        for (size_t k = 0; k < wrapper[i].location[l].size(); k++)
+                        {
+                            if (wrapper[i].location[l][k].first == "prefix")
+                            {
+                                if (wrapper[i].location[l][s].second[0][wrapper[i].location[l][s].second[0].size() - 1] != '/')
+                                    wrapper[i].location[l][s].second[0].append("/");
+                                wrapper[i].location[l][k].second =  wrapper[i].location[l][s].second;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/03/11 23:37:34 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/25 00:53:44 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,59 +37,25 @@ std::string trim(const std::string& str, const std::string& charsToTrim) {
 
 Server::Server( void ) {}
 
-void Server::handleHttpRequest(int cSock) {
-    // std::cout << greenColor << buffer << resetColor << std::endl;
-    // std::cout << "######################################################\n";
-    std::map<std::string , std::string>::iterator it;
-    for (it = this->request_data.begin() ; it != this->request_data.end() ; it++)
-        std::cout << it->first << " " << it->second << std::endl;
-    
-    if (request_data["Method"] == "GET") {
-        std::string requestedResource = request_data["Asset"];
-        if (requestedResource == "/")
-            requestedResource = "/index.html";
-
-        std::ifstream file("." + requestedResource, std::ios::binary);
-        if (!file.is_open()) {
-            std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
-            // std::cout << "NOT FOUND!!!!" << std::endl;
-            send(cSock, response.c_str(), response.length(), 0);
-            close(cSock);
-            clientSocket[cSock].resetRemainingBytes();
-            clientSocket[cSock].resetTotalBytesSent();
-            clientSocket[cSock].clearResponseBuffer();
-            // clientSocket.erase(cSock);
-        } else {
-            // Read the entire content of the file into a string        
-            std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-            file.close();
-
-            std::string content_type = "text/html";
-            std::string ext = requestedResource.substr(requestedResource.find_last_of(".") + 1);
-            if (ext == "css")
-                content_type = "text/css";
-            else if (ext == "png")
-                content_type = "image/png";
-            else if (ext == "jpg")
-                content_type = "image/jpeg";
-
-            // Build the HTTP response
-            std::string httpResponse = "HTTP/1.1 200 OK\r\n";
-            httpResponse += "Content-Type: " + content_type + "\r\n";
-            httpResponse += "Content-Length: " + std::to_string(content.size()) + "\r\n";
-            httpResponse += "\r\n" + content;
-
-            // Send the HTTP response
-            clientSocket[cSock].resetTotalBytesSent();
-            clientSocket[cSock].fillResponseBuffer(httpResponse);
-            clientSocket[cSock].setRemainingBytes(httpResponse.length());
-        }
+void Server::handleHttpRequest(int cSock, Parser &p, int flag, int type)
+{
+    if (flag == 1 && this->_errorCode == 0)
+    {
+        // std::cout << "IN FLAG\n";
+        createResponse(p, type, clientSocket[cSock]);
     }
-    // std::cout << "######################################################\n\n";
-    // close(cSock);
+    clientSocket[cSock].resetRemainingBytes();
+    clientSocket[cSock].resetTotalBytesSent();
+    clientSocket[cSock].clearBuffer();
+    clientSocket[cSock].clearResponseBuffer();
+    clientSocket[cSock].fillResponseBuffer(this->response);
+    clientSocket[cSock].setRemainingBytes(this->response.length());
+    clientSocket[cSock].clearBuffer();
+    // Send the HTTP response
+
 }
 
-void Server::callCGI( int index ) {CGI::extractClientContent(clientSocket[tmpEvents[index].fd]);}
+
 
 int Server::getClientPort(int index) {
     
@@ -154,37 +120,95 @@ bool Server::Sent(int cSock, int index) {
     return true;
 }
 
-void Server::GET( int index ) {
+void Server::GET(int index,  Parser &p, int type) {
 
     std::cout << redColor << "GET" << resetColor << std::endl;
-    handleHttpRequest(tmpEvents[index].fd);
+    this->_errorCode = 0;
+    std::string pr = this->getPort();
+    // std::cout << "THE METHOD => " << request_data["Method"] << "\n";
+    int check_error = requestErrorsHandling(p, pr);
+    // std::cout << "ERROR CHECK >> " << check_error << "\n";
+    if (this->_errorCode || check_error == 1)
+    {
+        // std::cout << "In errorCode > " << this->_errorCode  << "\n";
+        handleHttpRequest(tmpEvents[index].fd, p, 0, 0);
+    }
+    else if (this->request_data["Method"] == "GET" && check_error == 0)
+    {
+        std::cout << "IN GET\n";
+        handleHttpRequest(tmpEvents[index].fd, p, 1, type);
+    }
+    // std::cout << redColor << tmpEvents[index].fd << resetColor << std::endl;
 }
 
-void Server::POST(int index) {
+void Server::POST(int index, Parser &p, int type) {
 
-    std::cout << greenColor << "POST" << resetColor << std::endl;
+    // (void) type;
+    // (void) p;
+    // std::cout << greenColor << "POST" << resetColor << std::endl;
+
     clientSocket[tmpEvents[index].fd].appendPostBuffer(clientSocket[tmpEvents[index].fd].getBuffer());
-    if (clientSocket[tmpEvents[index].fd].getResponseBodyCounter() <= (clientSocket[tmpEvents[index].fd].getPostBuffer().size() - 200)) {
-        std::cout << "POST complited !" << std::endl;
+    // std::cout << "content lent ==> " << (int)atoi(contentLength->second.c_str()) << std::endl;
+    // std::cout << "lient buffer lent ==> " << (int)clientSocket[tmpEvents[index].fd].getPostBuffer().size() << std::endl;
+    if (clientSocket[tmpEvents[index].fd].getResponseBodyCounter() <= clientSocket[tmpEvents[index].fd].getPostBuffer().size()) {
+        // std::cout << redColor << clientSocket[tmpEvents[index].fd].getPostBuffer() << resetColor << std::endl;
+        //POST
+        ft_parse_request(clientSocket[tmpEvents[index].fd].getPostBuffer());
+        // std::ofstream file("output1.csv");
+        // if (file.is_open()) {
+        //     file << clientSocket[tmpEvents[index].fd].getPostBuffer();
+        // }
+        // TO GO TO THE REQUESTED RESPONSE
+        this->_errorCode = 0;
+        std::string pr = this->getPort();
+        // std::cout << "THE METHOD asdasdasd >> " << this->request_data["Method"] << "\n";
+        int check = requestErrorsHandling(p, pr);
+
+        if (check == 0)
         {
-            std::ofstream file("POSTinput.csv");
-            if (file.is_open()) {
-                file <<  clientSocket[tmpEvents[index].fd].getPostBuffer();
-                file.close();
-            }
+            // std::cout << "ERROR CODE => " <<  this->_errorCode << "\n";
+            handleHttpRequest(tmpEvents[index].fd, p, 1, type);
+
         }
+
+        clientSocket[tmpEvents[index].fd].fillResponseBuffer(this->response);
+        clientSocket[tmpEvents[index].fd].setRemainingBytes(this->response.length());
+        Sent(tmpEvents[index].fd, index);
         close(tmpEvents[index].fd);
         clientSocket[tmpEvents[index].fd].clearPostBuffer();
         clientSocket[tmpEvents[index].fd].resetResponseBodyCounter();
     }
+    clientSocket[tmpEvents[index].fd].clearBuffer();
+}
+
+
+void Server::DELETE(int index,  Parser &p, int type) {
+
+    std::cout << redColor << "GET" << resetColor << std::endl;
+    this->_errorCode = 0;
+    std::string pr = this->getPort();
+    // std::cout << "THE METHOD => " << request_data["Method"] << "\n";
+    int check_error = requestErrorsHandling(p, pr);
+    // std::cout << "ERROR CHECK >> " << check_error << "\n";
+    if (this->_errorCode || check_error == 1)
+    {
+        // std::cout << "In errorCode > " << this->_errorCode  << "\n";
+        handleHttpRequest(tmpEvents[index].fd, p, 0, 0);
+    }
+    else if (this->request_data["Method"] == "GET" && check_error == 0)
+    {
+        std::cout << "IN GET\n";
+        handleHttpRequest(tmpEvents[index].fd, p, 1, type);
+    }
+    // std::cout << redColor << tmpEvents[index].fd << resetColor << std::endl;
 }
 
 bool Server::receiveData(int cSock, int index) {
 
-    char chunk[CHUNK_SIZE];
+    char chunk[CHUNK_SIZE + 1];
 
-    bzero(chunk, sizeof(chunk));
-    int bytesRead = recv(cSock, chunk, sizeof(chunk) - ONE, ZERO);
+    bzero(chunk, CHUNK_SIZE + 1);
+    int bytesRead = recv(cSock, chunk, CHUNK_SIZE, ZERO);
     if (bytesRead == FAILED) {
         if (errno == EAGAIN || errno == EWOULDBLOCK)
             return false;
@@ -199,8 +223,8 @@ bool Server::receiveData(int cSock, int index) {
         return false;
     }
     chunk[bytesRead] = ZERO;
-    clientSocket[cSock].appendStr(chunk);
-    std::cout << redColor << "receving" <<resetColor << std::endl;
+    clientSocket[cSock].appendStr(chunk, bytesRead);
+    // std::cout << redColor << "receving" <<resetColor << std::endl;
     return true;
 }
 
@@ -225,8 +249,10 @@ bool Server::acceptNewConnection( ServerSocket server ) {
     return true;
 }
 
-void Server::runServer( void ) {
 
+void Server::runServer(Parser &p) {
+
+(void) p;
     bool isPost;
     while (true) {
     poll(tmpEvents.data(), tmpEvents.size(), -1);
@@ -247,23 +273,40 @@ void Server::runServer( void ) {
                 }
                 if (!clientSocket[tmpEvents[i].fd].getRemainingBytes() && !clientSocket[tmpEvents[i].fd].getResponseBodyCounter())
                 {
+
+
                     ft_parse_request(clientSocket[tmpEvents[i].fd].getBuffer());
                     std::cout << yellowColor << "request has been parced!" << resetColor << std::endl;
+                    
                 }
                 std::map<std::string, std::string>::iterator it = request_data.find("Content-Length");
                 //GET
+                    // std::cout << "THE PARSING\n";
+                    // std::cout <<  "THE REQUEST >> " << clientSocket[tmpEvents[i].fd].getBuffer() << "\n";
+                    // std::cout << "content length >> " << request_data["Content-Length"] << "\n";
+
                 if (it == request_data.end() && !clientSocket[tmpEvents[i].fd].getResponseBuffer().size() && !clientSocket[tmpEvents[i].fd].getResponseBodyCounter())
-                    GET(i);
+                {
+                    GET(i, p, 1);
+                }
                 //POST
                 else {
                     if (clientSocket[tmpEvents[i].fd].getPostBuffer().empty()) {
-                        clientSocket[tmpEvents[i].fd].initResponseBodyCounter((size_t)atoi(it->second.c_str()));
+                        // std::cout << "init body conter : " << (size_t) atoi(it->second.c_str()) << std::endl;
+                        clientSocket[tmpEvents[i].fd].initResponseBodyCounter((size_t) atoi(it->second.c_str()) + size_header);
                     }
-                    POST(i);
+                    // std::cout << "IN POST\n";
+                    POST(i, p, 0);
+                        // std::cout << "THE RESPONSE [POST] >> " << this->response << "\n";
                 }
+                // else if (this->request_data["Method"] == "DELETE")
+                // {
+                //     std::cout << yellowColor << "DELETE\n";
+                //     DELETE(i, p, 2);
+                // }
             }
             if (tmpEvents[i].revents & POLLOUT && !isServer(tmpEvents[i].fd)) {
-                if (clientSocket[tmpEvents[i].fd].getRemainingBytes()) { // don't close connection if the client 
+                if (clientSocket[tmpEvents[i].fd].getRemainingBytes()) { 
                     if (!Sent(tmpEvents[i].fd, i))
                         break;
                 }

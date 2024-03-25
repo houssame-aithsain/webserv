@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/07 17:35:43 by gothmane          #+#    #+#             */
-/*   Updated: 2024/02/17 18:36:53 by hait-hsa         ###   ########.fr       */
+/*   Created: 2024/03/17 15:53:27 by gothmane          #+#    #+#             */
+/*   Updated: 2024/03/18 15:54:25 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,10 @@ int main()
     try {
         p.ft_read_nd_parse("confg.toml");
         s.initializeSocket(p.wrapper);
-        s.runServer();
+        s.runServer(p);
     } catch (const char * error) {
         std::cout << error << std::endl;
-    } catch (...) {
-        std::cout << "WEBSERV ERROR" << std::endl;
+    } catch (std::exception &e) {
+        std::cout << "WEBSERV ERROR >> " << e.what()  << std::endl;
     }
 }

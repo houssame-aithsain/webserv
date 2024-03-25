@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:15 by gothmane          #+#    #+#             */
-/*   Updated: 2024/02/10 18:40:29 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/03/24 19:54:20 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,23 +26,21 @@ typedef struct t_server_data
 
 class Parser
 {
-    private:
-        int     port;
+    protected :
+        int         port;
         server_data data;
-   public:
+
+    public:
         std::vector <server_data> wrapper;
         Parser();
         Parser(const Parser& p);
         Parser& operator=(const Parser& p);
         ~Parser();
-        // std::vector<std::pair<std::string, std::vector<std::string> > > getServer();
-        // void setServer(const std::vector<std::pair<std::string, std::vector<std::string> > > &server);
-                // Getter pour port
+        
         int getPort() const {
             return port;
         }
 
-        // Setter pour port
         void setPort(int p) {
             port = p;
         }
@@ -52,4 +50,9 @@ class Parser
         std::vector<server_data> getWrapper( void );
         std::string ft_trim(const std::string& str, std::string trim);
         std::vector<std::string>  ft_split_the_multiple_data(std::string value);
+        std::vector<std::string>    get_data_from_conf(std::string &port, std::string prefix, std::string key, int bv);
+        std::vector<std::string>      get_server_locations(std::string &port);
+        void    check_for_default_location(void);
+        void replace_prefix_with_alias(void);
+
 };

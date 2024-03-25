@@ -1,68 +1,43 @@
 [[server]]
-	port = "1336"
-	host = "10.0.0.1"
-	root = "www"
-	server_name = ["example1.com", "example22.com", "example3.com"]
-	index = ["index.html", "index.htm"]
+
+	port = 1336
+	host = 10.0.0.1
+	root = /Users/hait-hsa/Desktop/second_v
+	server_name = example1.com
+	index = index.html
+	allowed_methods = ["GET", "POST"]
+	autoindex = on
 	error_page = ["404", "www/error_pages/404.html"]
-	_clientMaxBodySize = "100m"
-	upload_path = "www/upload"
+	_clientMaxBodySize = 15555
+
 		[[server.location]]
-		prefix = "/html"
-		root = "www"
-		index = ["index.html",  "index.htm"]
-		allowed_methods = ["GET", "DELETE"]
-		error_page = ["502", "/404.html"]
-		autoindex = "on"
-		_clientMaxBodySize = "10m"
-[[server]]
-	port = "1337"
-	host = "10.0.0.1"
-	root = "www"
-	server_name = ["example1.com", "example22.com", "example3.com"]
-	index = ["index.html", "index.htm"]
-	error_page = ["404", "www/error_pages/404.html"]
-	_clientMaxBodySize = "100m"
-	upload_path = "www/upload"
+		
+			prefix = /ewq/
+			autoindex = off
+			root = /Users/hait-hsa/Desktop/second_v/asd
+			index = test1.html
+			alias = /eee
+			error_page = ["404", "/404.html"]
+			_clientMaxBodySize = 10215455
+
 		[[server.location]]
-		prefix = "/html"
-		root = "www"
-		index = ["index.html",  "index.htm"]
-		allowed_methods = ["GET", "DELETE"]
-		error_page = ["502", "/404.html"]
-		autoindex = "on"
-		_clientMaxBodySize = "10m"
-[[server]]
-	port = "1338"
-	host = "10.0.0.1"
-	root = "www"
-	server_name = ["example1.com", "example22.com", "example3.com"]
-	index = ["index.html", "index.htm"]
-	error_page = ["404", "www/error_pages/404.html"]
-	_clientMaxBodySize = "100m"
-	upload_path = "www/upload"
+
+			prefix = /aa
+			autoindex = on
+			alias = asdasd/asdasd
+			upload 
+			cgi = .py
+
 		[[server.location]]
-		prefix = "/html"
-		root = "www"
-		index = ["index.html",  "index.htm"]
-		allowed_methods = ["GET", "DELETE"]
-		error_page = ["502", "/404.html"]
-		autoindex = "on"
-		_clientMaxBodySize = "10m"
-[[server]]
-	port = "1339"
-	host = "10.0.0.1"
-	root = "www"
-	server_name = ["example1.com", "example22.com", "example3.com"]
-	index = ["index.html", "index.htm"]
-	error_page = ["404", "www/error_pages/404.html"]
-	_clientMaxBodySize = "100m"
-	upload_path = "www/upload"
-		[[server.location]]
-		prefix = "/html"
-		root = "www"
-		index = ["index.html",  "index.htm"]
-		allowed_methods = ["GET", "DELETE"]
-		error_page = ["502", "/404.html"]
-		autoindex = "on"
-		_clientMaxBodySize = "10m"
+		
+			prefix = /
+			autoindex = off
+			root = /Users/hait-hsa/Desktop/second_v/
+			index = index.html
+			error_page = ["404", "/404.html"]
+			_clientMaxBodySize = 52428800
+			cgi = .py
+
+
+
+
