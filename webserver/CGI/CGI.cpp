@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/02 12:40:23 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/03/25 17:38:39 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/25 18:20:11 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ void CGI::executeCGIscript(Client &client) {
             bzero(buffer, BUFFER_SIZE);
         }
         close(chiledFD);
+        close(parentFD);
         std::cout << "CGI OUTPUT [" << output << "]" << std::endl;
         client.resetTotalBytesSent();
         client.fillResponseBuffer(output);
@@ -93,10 +94,10 @@ void CGI::POSTenvInit(Client client, std::map<std::string, std::string> data) {
 
 void CGI::extractClientContent(Client & client, std::map<std::string, std::string> data) 
 {
-    std::cout << "-+-+-+-+-+-+-+-+-+-+-+-+-PRINT REQUEST DATA+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
-    for (std::map<std::string, std::string>::iterator it = data.begin(); it != data.end(); it++)
-        std::cout << it->first << " ::::::: " << it->second << std::endl;
-    std::cout << "-+-+-+-+-+-+-+-+-+-+-+-+-PRINT REQUEST DATA END+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
+    // std::cout << "-+-+-+-+-+-+-+-+-+-+-+-+-PRINT REQUEST DATA+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
+    // for (std::map<std::string, std::string>::iterator it = data.begin(); it != data.end(); it++)
+    //     std::cout << it->first << " ::::::: " << it->second << std::endl;
+    // std::cout << "-+-+-+-+-+-+-+-+-+-+-+-+-PRINT REQUEST DATA END+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
     if (data["Method"] == "GET") {
         GETenvInit(client, data);
     }
