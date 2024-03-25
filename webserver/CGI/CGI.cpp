@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/02 12:40:23 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/03/25 18:20:11 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/25 19:30:47 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,44 +20,60 @@
 #define BUFFER_SIZE 1024
 
 void CGI::executeCGIscript(Client &client) {
-
     ssize_t max;
     int status;
     char buffer[BUFFER_SIZE + 1];
     char cmd[] = "/usr/bin/python3";
-    char *const args[] = {const_cast<char *>("python3"), const_cast<char *>("/Users/hait-hsa/Desktop/second_v/webserver/CGI/CGIscript/runCGI.py"), nullptr};
+    char *const args[] = {cmd, const_cast<char *>("/Users/hait-hsa/Desktop/second_v/webserver/CGI/CGIscript/runCGI.py"), nullptr};
     FILE *parentTmpFile = tmpfile();
-    FILE *chiledTmpFile = tmpfile();
+    FILE *childTmpFile = tmpfile();
+
+    if (!parentTmpFile || !childTmpFile) {
+        perror("tmpfile");
+        return;
+    }
+
     int parentFD = fileno(parentTmpFile);
-    int chiledFD = fileno(chiledTmpFile);
+    int childFD = fileno(childTmpFile);
+
+    if (parentFD == -1 || childFD == -1) {
+        perror("fileno");
+        if (parentTmpFile) fclose(parentTmpFile);
+        if (childTmpFile) fclose(childTmpFile);
+        return;
+    }
     write(parentFD, client.getPostBuffer().c_str(), client.getPostBuffer().size());
     fflush(parentTmpFile);
     rewind(parentTmpFile);
-    int psid = fork();
-    if (!psid) {
+    int pid = fork();
+    if (pid == 0) {
         dup2(parentFD, STDIN_FILENO);
-        dup2(chiledFD, STDOUT_FILENO);
+        dup2(childFD, STDOUT_FILENO);
+        fclose(parentTmpFile);
+        fclose(childTmpFile);
         execve(cmd, args, env.data());
-    } else {
-        waitpid(psid, &status, 0);
-        bzero(buffer, BUFFER_SIZE);
-        fflush(chiledTmpFile);
-        rewind(chiledTmpFile);
-        while ((max = read(chiledFD, buffer, BUFFER_SIZE))) {
-            if (max == -1) {
-                perror("read()");
-                break;
-            }
+        perror("execve");
+    } else if (pid > 0) {
+        fclose(parentTmpFile);
+        waitpid(pid, &status, 0);
+        rewind(childTmpFile);
+        std::string output;
+        while ((max = read(childFD, buffer, BUFFER_SIZE)) > 0) {
             buffer[max] = '\0';
             output += buffer;
-            bzero(buffer, BUFFER_SIZE);
         }
-        close(chiledFD);
-        close(parentFD);
+        if (max == -1) {
+            perror("read");
+        }
+        fclose(childTmpFile);
         std::cout << "CGI OUTPUT [" << output << "]" << std::endl;
         client.resetTotalBytesSent();
         client.fillResponseBuffer(output);
         client.setRemainingBytes(output.length());
+    } else {
+        perror("fork");
+        fclose(parentTmpFile);
+        fclose(childTmpFile);
     }
 }
 
