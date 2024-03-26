@@ -6,11 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2024/03/25 02:53:52 by gothmane         ###   ########.fr       */
-=======
-/*   Updated: 2024/03/25 00:53:44 by gothmane         ###   ########.fr       */
->>>>>>> ed030b7b4a37f89b9dcbf00fe7c22b92e2448571
+/*   Updated: 2024/03/26 21:38:55 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,11 +151,7 @@ void Server::POST(int index, Parser &p, int type) {
     // std::cout << "content lent ==> " << (int)atoi(contentLength->second.c_str()) << std::endl;
     // std::cout << "lient buffer lent ==> " << (int)clientSocket[tmpEvents[index].fd].getPostBuffer().size() << std::endl;
     if (clientSocket[tmpEvents[index].fd].getResponseBodyCounter() <= clientSocket[tmpEvents[index].fd].getPostBuffer().size()) {
-<<<<<<< HEAD
         std::cout << redColor << clientSocket[tmpEvents[index].fd].getPostBuffer() << resetColor << std::endl;
-=======
-        // std::cout << redColor << clientSocket[tmpEvents[index].fd].getPostBuffer() << resetColor << std::endl;
->>>>>>> ed030b7b4a37f89b9dcbf00fe7c22b92e2448571
         //POST
         ft_parse_request(clientSocket[tmpEvents[index].fd].getPostBuffer());
         // std::ofstream file("output1.csv");
