@@ -3,12 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/16 20:18:04 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/03/11 22:30:46 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/24 22:13:36 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+
 
 #include "Client.hpp"
 #include <unistd.h>
@@ -30,8 +32,7 @@ int Client::getFD( void ) {return (event.fd);}
 
 std::string Client::getBuffer( void ) {return (requestBuffer);}
 
-void Client::appendStr(char *chunk) {requestBuffer += chunk;}
-
+void Client::appendStr(char *chunk, size_t bytesSize) {requestBuffer.append(chunk, bytesSize);}
 //
 
 void Client::changePollFd(pollfd me) {event = me;}

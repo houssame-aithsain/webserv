@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
+/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/03/11 23:29:53 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/24 22:20:57 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@
 
 #define SOCKETFAILED "Error binding socket!"
 
-class Server : public Parser , public Response, public ServerSocket, public Client, public CGI {
+class Server : virtual public Parser , public Response, public ServerSocket, public Client {
     private:
         pollfd events;
         // int serverSocketFd;
@@ -59,15 +59,16 @@ class Server : public Parser , public Response, public ServerSocket, public Clie
         Server( void );
         // server( const server & other );
         // server operator=(const server & other);
-        void runServer( void );
+        void runServer(Parser &p);
         void initializeSocket(  std::vector<server_data> serverData );
-        void handleHttpRequest(int clientSocket);
+        void handleHttpRequest(int clientSocket, Parser &p, int flag, int type);
         bool receiveData(int cSock, int index);
         bool acceptNewConnection( ServerSocket server );
         std::vector<Client> creatClientOBJ(void);
         static void handelSignal(int signum);
-        void GET( int index );
-        void POST(int index);
+        void POST(int index, Parser &p, int type);
+        void GET( int index, Parser &p, int type);
+        void DELETE( int index, Parser &p, int type);
         int getServerPort( void );
         int getServerSocketFd( void );
         bool Sent(int cSock, int index);
