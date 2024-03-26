@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:13 by gothmane          #+#    #+#             */
-/*   Updated: 2024/03/26 21:25:49 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/03/26 21:37:57 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -274,7 +274,6 @@ void Parser::ft_read_nd_parse(std::string fileName)
         std::cout << "Unable to open file\n";
 
     check_for_default_location();
-    // ft_print_data();
 }
 
 std::vector<server_data> Parser::getWrapper( void ) {return (wrapper);}
