@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/27 18:16:38 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/03/24 22:20:57 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/03/27 01:46:12 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ class Server : virtual public Parser , public Response, public ServerSocket, pub
         std::vector<ServerSocket> virtualServer;
         std::vector<int> serverPort;
         std::vector<pollfd> tmpEvents;
+        std::map<std::string, std::vector<std::pair<std::string, std::string > > > serverUnitsData;
         // std::map<int, Client> clientsSocket;
     public:
         // virtual ~Server( void );
@@ -77,4 +78,5 @@ class Server : virtual public Parser , public Response, public ServerSocket, pub
         void callCGI( int index );
         int getClientPort(int index);
         class MyExceptio : public std::exception {};
+        void collectServersData(std::vector<server_data> serverData);
 };
