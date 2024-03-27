@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 16:08:13 by gothmane          #+#    #+#             */
-/*   Updated: 2024/03/26 21:37:57 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/03/25 02:24:27 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -274,6 +274,8 @@ void Parser::ft_read_nd_parse(std::string fileName)
         std::cout << "Unable to open file\n";
 
     check_for_default_location();
+    replace_prefix_with_alias();
+    // ft_print_data();
 }
 
 std::vector<server_data> Parser::getWrapper( void ) {return (wrapper);}
@@ -320,14 +322,12 @@ std::vector<std::string> Parser::get_data_from_conf(std::string &port, std::stri
     std::vector<std::string> default_value;
     std::vector<std::string> empty_for_empty;
     
-
-    if (prefix[prefix.size() - 1] != '/')
-        prefix.append("/");
-
     // std::cout << "in parsing config data\n";
     // std::cout << "the port >> " << port << "\n";
     // std::cout << "the prefix >> " << prefix << "\n";
     // std::cout << "the key >> " << key << "\n";
+    if (prefix[prefix.size() - 1] != '/')
+        prefix.append("/");
     for (; i < wrapper.size(); i++)
     {
         for (size_t j = 0; j < wrapper[i].server.size(); j++)
@@ -356,22 +356,21 @@ std::vector<std::string> Parser::get_data_from_conf(std::string &port, std::stri
                 size_t s = 0;
                 for (; s < wrapper[i].location[l].size(); s++)
                 {
-                
+                    // std::cout << "THE KEY >> => " << ft_trim(wrapper[i].location[l][k].second[0], " \"\'\t") << std::endl;
+                    // std::cout << "THE PREFIX >> => " << prefix << std::endl;
+                    // std::cout << "THE KEY LOOKING FOR >> => " << key << std::endl;
+                    // std::cout << "THE INDEX FOR LOCATION >> => " << l << std::endl;
+                    // std::cout << "THE key FOR LOCATION >> => " << wrapper[i].location[l][k].first << std::endl;
                     if (wrapper[i].location[l][s].first == "prefix" 
                         && ft_trim(wrapper[i].location[l][s].second[0], " \"\'\t") == prefix)
                     {
                         
                         for (size_t k = 0; k < wrapper[i].location[l].size(); k++)
                         {
-                        
                            
                             if (wrapper[i].location[l][k].first == key)
                             {
-                                // std::cout << "THE KEY >> => " << ft_trim(wrapper[i].location[l][k].second[0], " \"\'\t") << std::endl;
-                                // std::cout << "THE PREFIX >> => " << prefix << std::endl;
-                                // std::cout << "THE KEY LOOKING FOR >> => " << key << std::endl;
-                                // std::cout << "THE INDEX FOR LOCATION >> => " << l << std::endl;
-                                // std::cout << "THE key FOR LOCATION >> => " << wrapper[i].location[l][k].first << std::endl;
+                                
                                 return (wrapper[i].location[l][k].second);
                             }
                         }
@@ -455,35 +454,35 @@ std::vector<std::string> Parser::get_server_locations(std::string &port)
 }
 
 
-// void Parser::replace_prefix_with_alias(void)
-// {
-//     size_t i = 0;
-//     std::vector<std::string> default_value;
+void Parser::replace_prefix_with_alias(void)
+{
+    size_t i = 0;
+    std::vector<std::string> default_value;
     
-//     for (; i < wrapper.size(); i++)
-//     {
-//         for (size_t j = 0; j < wrapper[i].server.size(); j++)
-//         {
-//             for (size_t l = 0; l < wrapper[i].location.size(); l++)
-//             {
-//                 size_t s = 0;
-//                 for (; s < wrapper[i].location[l].size(); s++)
-//                 {
-//                     if (wrapper[i].location[l][s].first == "alias" )
-//                     {
-//                         for (size_t k = 0; k < wrapper[i].location[l].size(); k++)
-//                         {
-//                             if (wrapper[i].location[l][k].first == "prefix")
-//                             {
-//                                 if (wrapper[i].location[l][s].second[0][wrapper[i].location[l][s].second[0].size() - 1] != '/')
-//                                     wrapper[i].location[l][s].second[0].append("/");
-//                                 wrapper[i].location[l][k].second =  wrapper[i].location[l][s].second;
-//                             }
-//                         }
-//                         break;
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
+    for (; i < wrapper.size(); i++)
+    {
+        for (size_t j = 0; j < wrapper[i].server.size(); j++)
+        {
+            for (size_t l = 0; l < wrapper[i].location.size(); l++)
+            {
+                size_t s = 0;
+                for (; s < wrapper[i].location[l].size(); s++)
+                {
+                    if (wrapper[i].location[l][s].first == "alias" )
+                    {
+                        for (size_t k = 0; k < wrapper[i].location[l].size(); k++)
+                        {
+                            if (wrapper[i].location[l][k].first == "prefix")
+                            {
+                                if (wrapper[i].location[l][s].second[0][wrapper[i].location[l][s].second[0].size() - 1] != '/')
+                                    wrapper[i].location[l][s].second[0].append("/");
+                                wrapper[i].location[l][k].second =  wrapper[i].location[l][s].second;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}

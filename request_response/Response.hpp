@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/11 18:36:03 by gothmane          #+#    #+#             */
-/*   Updated: 2024/03/26 21:37:22 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/03/24 22:43:21 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,15 +64,10 @@ class Response : virtual public Parser,  public CGI
         std::string                         requestedQuery;
         std::vector<std::string>            header;
         int                                 size_header;
-        std::map<int, std::string>          msg_code;
         
     public:
         Response();
         ~Response();
-
-        void        msg_code_arr();
-        std::string check_alias(Parser &p, std::string port, std::string prefix);
-        std::string get_msg(int code);
         std::string ft_getPageToRender(std::vector<std::pair<std::string, std::vector<std::string> > > ParsedRequest);
         void        ft_parse_request(std::string request);
         void        initMapErrors();

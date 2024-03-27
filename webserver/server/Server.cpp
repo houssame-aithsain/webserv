@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
+/*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/01 01:27:52 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/03/26 21:38:55 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/03/27 02:36:14 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,19 +79,67 @@ bool Server::isServer( int cSock ) {
     return false;
 }
 
+// cllect server data
+
+void Server::collectServersData(std::vector<server_data> serverData) {
+
+    std::string host;
+    std::string server_name;
+
+    for (std::vector<server_data>::iterator it = serverData.begin(); it != serverData.end(); it++) {
+        for (size_t x = 0; x < it->server.size(); x++) {
+            if (it->server[x].first == "host")
+                host = it->server[x].second[0];
+            if (it->server[x].first == "server_name")
+                server_name = it->server[x].second[0];
+        }
+        for (size_t x = 0; x < it->server.size(); x++) {
+            for (size_t i = 0; i < it->server[x].second.size() && it->server[x].first == "port"; i++) {
+                serverUnitsData[it->server[x].second[i]].push_back(std::make_pair(host, server_name));
+            }
+        }
+    }
+    // for (std::map<int, std::vector<std::pair<std::string, std::string > > >::iterator it = serverUnitsData.begin(); it != serverUnitsData.end(); it++) {
+    //     std::cout << it->first << " : [";
+    //     for (size_t i = 0; i < it->second.size(); i++) {
+    //         std::cout << it->second[i].first << " <-> " << it->second[i].second << " | ";
+    //     }
+    //     std::cout << "]" << std::endl;
+    // }
+    // exit(0);
+}
+    
+//end
+
 void Server::initializeSocket(std::vector<server_data> serverData) {
     
-    for (std::vector<server_data>::iterator it = serverData.begin(); it != serverData.end(); it++) {
-        serverPort.push_back(std::atoi(trim(it->server[ZERO].second[ZERO], "\"").c_str()));
+    collectServersData(serverData);
+    std::vector<std::string> bindedHosts;
+    std::vector<std::string> bindedPorts;
+
+    // defrent logic
+
+    for (std::map<std::string, std::vector<std::pair<std::string, std::string > > >::iterator it = serverUnitsData.begin(); it != serverUnitsData.end(); it++) {
+        bindedPorts.push_back(it->first);
+        for (size_t i = ZERO; i < it->second.size(); i++) {
+            if ((std::find(bindedHosts.begin(), bindedHosts.end(), it->second[i].first) == bindedHosts.end() || std::find(bindedPorts.begin(), bindedPorts.end(), it->first) == bindedPorts.end()) || !i) {
+                // std::cout << "server port : " << it->first << " | server adress : " << it->second[i].first << std::endl;
+                virtualServer.push_back(ServerSocket(atoi(it->first.c_str()), it->second[i].first, it->second[i].second));
+                INIT_EVENT(events, virtualServer.back().getServerSocketFd());
+                tmpEvents.push_back(events);
+                bindedHosts.push_back(it->second[i].first);
+            }
+        }
     }
-    for (std::vector<int>::iterator it = serverPort.begin(); it != serverPort.end(); it++) {
-        virtualServer.push_back(ServerSocket(*it));
-        INIT_EVENT(events, virtualServer.back().getServerSocketFd());
-        std::cout << redColor << "server port" << greenColor << " <" << redColor << ":" << greenColor << "> " << yellowColor << *it << resetColor << std::endl;
-        std::cout << greenColor << "server   fd" << redColor << " <" << greenColor << ":" << redColor << "> " << yellowColor << virtualServer.back().getServerSocketFd() << resetColor << std::endl;
-        std::cout << "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
-        tmpEvents.push_back(events);
-    }
+
+    // end
+
+    // for (std::vector<int>::iterator it = serverPort.begin(); it != serverPort.end(); it++) {
+    //     virtualServer.push_back(ServerSocket(*it));
+    //     std::cout << redColor << "server port" << greenColor << " <" << redColor << ":" << greenColor << "> " << yellowColor << *it << resetColor << std::endl;
+    //     std::cout << greenColor << "server   fd" << redColor << " <" << greenColor << ":" << redColor << "> " << yellowColor << virtualServer.back().getServerSocketFd() << resetColor << std::endl;
+    //     std::cout << "-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-" << std::endl;
+    // }
     // signal(SIGINT, Server::handelSignal); i should close all sockets fds
     signal(SIGPIPE, SIG_IGN);
 }
@@ -151,7 +199,7 @@ void Server::POST(int index, Parser &p, int type) {
     // std::cout << "content lent ==> " << (int)atoi(contentLength->second.c_str()) << std::endl;
     // std::cout << "lient buffer lent ==> " << (int)clientSocket[tmpEvents[index].fd].getPostBuffer().size() << std::endl;
     if (clientSocket[tmpEvents[index].fd].getResponseBodyCounter() <= clientSocket[tmpEvents[index].fd].getPostBuffer().size()) {
-        std::cout << redColor << clientSocket[tmpEvents[index].fd].getPostBuffer() << resetColor << std::endl;
+        // std::cout << redColor << clientSocket[tmpEvents[index].fd].getPostBuffer() << resetColor << std::endl;
         //POST
         ft_parse_request(clientSocket[tmpEvents[index].fd].getPostBuffer());
         // std::ofstream file("output1.csv");
@@ -224,7 +272,7 @@ bool Server::receiveData(int cSock, int index) {
     }
     chunk[bytesRead] = ZERO;
     clientSocket[cSock].appendStr(chunk, bytesRead);
-    // std::cout << redColor << "receving" <<resetColor << std::endl;
+    // std::cout << redColor << clientSocket[cSock].getBuffer() <<resetColor << std::endl;
     return true;
 }
 

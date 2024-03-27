@@ -6,7 +6,7 @@
 /*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/11 18:36:05 by gothmane          #+#    #+#             */
-/*   Updated: 2024/03/26 21:38:36 by gothmane         ###   ########.fr       */
+/*   Updated: 2024/03/25 02:21:33 by gothmane         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,61 +23,22 @@ Response::~Response()
     
 }
 
-void Response::msg_code_arr()
-{
-    msg_code[100] = "Continue";
-    msg_code[101] = "Switching Protocols";
-    msg_code[200] = "OK";
-    msg_code[201] = "Created";
-    msg_code[202] = "Accepted";
-    msg_code[203] = "Non-Authoritative Information";
-    msg_code[204] = "No Content";
-    msg_code[205] = "Reset Content";
-    msg_code[206] = "Partial Content";
-    msg_code[300] = "Multiple Choices";
-    msg_code[301] = "Moved Permanently";
-    msg_code[302] = "Found";
-    msg_code[303] = "See Other";
-    msg_code[304] = "Not Modified";
-    msg_code[305] = "Use Proxy";
-    msg_code[307] = "Temporary Redirect";
-    msg_code[400] = "Bad Request";
-    msg_code[401] = "Unauthorized";
-    msg_code[402] = "Payment Required";
-    msg_code[403] = "Forbidden";
-    msg_code[404] = "Not Found";
-    msg_code[405] = "Method Not Allowed";
-    msg_code[406] = "Not Acceptable";
-    msg_code[407] = "Proxy Authentication Required";
-    msg_code[408] = "Request Timeout";
-    msg_code[409] = "Conflict";
-    msg_code[410] = "Gone";
-    msg_code[411] = "Length Required";
-    msg_code[412] = "Precondition Failed";
-    msg_code[413] = "Request Entity Too Large";
-    msg_code[414] = "Request-URI Too Long";
-    msg_code[415] = "Unsupported Media Type";
-    msg_code[416] = "Requested Range Not Satisfiable";
-    msg_code[417] = "Expectation Failed";
-    msg_code[500] = "Internal Server Error";
-    msg_code[501] = "Not Implemented";
-    msg_code[502] = "Bad Gateway";
-    msg_code[503] = "Service Unavailable";
-    msg_code[504] = "Gateway Timeout";
-    msg_code[505] = "HTTP Version Not Supported";
-}
 
-std::string Response::get_msg(int code) 
+void        Response::reqestMapPrinter()
 {
-    msg_code_arr();
-    std::map<int, std::string>::iterator it = msg_code.find(code);
-    if (it != msg_code.end()) {
-        return it->second;
-    } else {
-        return "Unknown code";
-    }
-}
+    requestMap_it it = this->request_data.begin();
+    for (; it != this->request_data.end() ; it++)
+    {
+        LOG(it->first << " " << it->second);
+    }    
 
+    LOG(this->request_data["URI"]);
+    LOG(this->request_data["URI"]);
+    LOG(this->request_data["URI"]);
+    LOG(this->request_data["URI"]);
+    LOG(this->request_data["URI"]);
+    LOG(this->request_data["URI"]);
+}
 
 std::string ft_cut_file_from_req(std::string &rs)
 {
@@ -238,10 +199,7 @@ void    Response::locationsMatching(Parser &p, std::string &port, std::string &p
     size_t i = 0;
 
     if (page_path[page_path.size() - 1] != '/')
-    {
-        page_path.append("/");
         check_slash = 1;
-    }
     while (check_cut_location || !page_path.empty())
     {
         i = 0;
@@ -261,17 +219,9 @@ void    Response::locationsMatching(Parser &p, std::string &port, std::string &p
             int end = page_path.size();
             if (start < end)
             {
-             
                 page_path.erase(start, end);
-                // if (check_slash)
-                // {
-                //     page_path.append("/");
-                //     check_slash = 1;
-                // }
-                // if (start > 0 && page_path[start - 1] != '/')
-                //     page_path.append("/");
-
-                std::cout << "PAGE PATH => " << page_path << "    START => " << start << " end => " << end << "\n";
+                if (check_slash && (check_slash = 0))
+                    page_path.append("/");
                 if (page_path.empty())
                 {
                     i = 0;
@@ -283,29 +233,6 @@ void    Response::locationsMatching(Parser &p, std::string &port, std::string &p
                             check_cut_location = 0;
                             this->location = "/";
                             page_path = "/";
-                            return ;
-                        }
-                    }
-                }
-                else
-                {
-                    i = 0;
-                    for(; i < locations_.size(); i++)
-                    {
-                        std::cout << "LOCATION >> " << locations_[i] << "\n";
-                        std::cout << "page_path >> " << page_path << "\n";
-                        // if (page_path[page_path.size() - 1]  != '/')
-                        //     page_path.append("/");
-                        if (locations_[i][locations_[i].size() - 1] == '/')
-                        {
-                            std::cout << "IN HERE\n";
-                            locations_[i] = locations_[i].substr(0, locations_[i].size() - 1);
-                        }
-                        if (ft_trim(locations_[i], " \"\'\t") ==  page_path)
-                        {
-                            check = 1;
-                            check_cut_location = 0;
-                            this->location = page_path;
                             return ;
                         }
                     }
@@ -535,11 +462,12 @@ std::string Response::parse_request_body(std::string body)
         }
     }
     
-    // if (val.empty()) 
-    //     std::cout << "Boundary not found" << std::endl;
+    if (val.empty()) 
+        std::cout << "Boundary not found" << std::endl;
 
 
     std::string filename = get_filename(body);
+    // std::cout << "THE FILENAME => " <<  filename << "\n";
     std::string contentFile = get_content_body(body);
 
     this->request_data["filename"] = filename;
@@ -855,14 +783,14 @@ bool Response::post_req_handler(Parser &p, std::string &port, Client &client)
 bool Response::check_error_page(Parser &p, std::string port, std::string prefix)
 {
     (void) prefix;
-    std::cout << "this->location >> " << this->location<< "\n";
+    // std::cout << "this->location >> " << this->location<< "\n";
     std::string root = get_root_for_location(p, port, this->location);
     std::vector<std::string> data = p.get_data_from_conf(port, this->location, "error_page", 1);
 
     if (!data.empty() && data.size() > 1 && this->_errorCode == std::atoi(data[0].c_str()))
     {
         root = root.append("/"+data[1]);
-        std::cout << "in hereeee ERROR PAGE >> " << root << "\n";
+        // std::cout << "in hereeee ERROR PAGE >> " << root << "\n";
         
         std::ifstream file(root, std::ios::binary);
         if (!file.is_open())
@@ -891,7 +819,7 @@ bool Response::check_error_page(Parser &p, std::string port, std::string prefix)
             else if (ext == "avif")
                 content_type = "image/avif";
             
-            httpResponse = "HTTP/1.1 " + data[0] +" "+ get_msg(std::atoi(data[0].c_str())) +"\r\n";
+            httpResponse = "HTTP/1.1 " + data[0] +"\r\n";
             httpResponse += "Content-Type: "+content_type+"\r\n";
             httpResponse += "Content-Length: " + std::to_string(content.size()) + "\r\n"; // remove to_string
             httpResponse += "\r\n" + content;
@@ -935,50 +863,12 @@ std::string getResourceType(const std::string& path) {
     }
 }
 
-
-std::string Response::check_alias(Parser &p, std::string port, std::string prefix)
-{
-    std::string page_path = prefix;
-    std::vector<std::string> roots;
-
-
-    if (page_path == "")
-        page_path = "/";
-    else if (page_path.find(".") != std::string::npos)
-        page_path = ft_cut_file_from_req(page_path);
-
-    std::cout << "THE PAGE PATHHHH => " << page_path << "\n";
-    roots = p.get_data_from_conf(port, page_path, "alias", 1);
-    if (!roots.empty())
-        return (roots[0]);
-    return ("");
-}
-
 void Response::init_request_data(Parser &p)
 {
     port = this->getPort(); // anrdoh dynamic
     requestedResource = ft_getPageName(request_data["URI"]);
     root_path = get_root_for_location(p, port, requestedResource);
-    std::string alias = check_alias(p, port, this->location);
-    std::cout << "ALIAS >>> " << alias << "\n";
-    std::cout << "ALIAS >>> " << this->location << "\n";
-    if (!alias.empty())
-    {
-        std::string rr = requestedResource;
-
-        rr.append("/");
-        size_t start_pos = rr.find(this->location);
-        if(start_pos != std::string::npos)
-            rr.replace(start_pos, this->location.size(), alias);
-        new_req_resource = root_path + rr;
-    }
-    else
-        new_req_resource = root_path + requestedResource;
-    
-    std::cout << "requestedRes => " << requestedResource << "\n";
-    std::cout << "ROOT PATH => " << new_req_resource << "\n";
-    std::cout << "LOCATION => " << location << "\n";
-
+    new_req_resource = root_path + requestedResource;
     type_ = getResourceType(new_req_resource);
     if (type_ == "file")
         fileName = ft_get_file(request_data["URI"]);

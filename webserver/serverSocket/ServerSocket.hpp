@@ -6,7 +6,7 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 11:40:00 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/03/07 17:41:10 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/27 01:07:09 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,17 +26,19 @@
 
 #define INIT_SOCKET(socketAddress, PORT)     \
     socketAddress.sin_family = AF_INET;       \
-    socketAddress.sin_addr.s_addr = INADDR_ANY;\
+    socketAddress.sin_addr.s_addr = inet_addr(hostName.c_str()); \
     socketAddress.sin_port = htons(PORT);       \
 
 class ServerSocket {
     private:
         int sockPort;
+        std::string hostName;
+        std::string serverName;
         sockaddr_in socketAddress;
         int serverSocketFd;
     public:
         ServerSocket( void );
-        ServerSocket( int port );
+        ServerSocket( int port, std::string host, std::string name );
         void sockCreat( void );
         void reuseSocket( void );
         void nonBlockingMode( void );

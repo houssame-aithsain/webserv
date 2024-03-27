@@ -6,15 +6,16 @@
 /*   By: hait-hsa <hait-hsa@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/17 11:40:05 by hait-hsa          #+#    #+#             */
-/*   Updated: 2024/03/10 22:01:22 by hait-hsa         ###   ########.fr       */
+/*   Updated: 2024/03/27 02:39:16 by hait-hsa         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ServerSocket.hpp"
+#include <arpa/inet.h>
 
 ServerSocket::ServerSocket( void ) {}
 
-ServerSocket::ServerSocket( int port ) : sockPort(port) {
+ServerSocket::ServerSocket( int port, std::string host, std::string name ) : sockPort(port), hostName( host ), serverName( name ) {
 
     sockCreat();
     INIT_SOCKET(socketAddress, sockPort);
@@ -57,7 +58,7 @@ void ServerSocket::sockListen( void ) {
         close(serverSocketFd);
         throw "failed to make the socket at the listen mode!";
     }
-    std::cout << blueColor << "server now is listening on port "<< resetColor << sockPort << std::endl;
+    std::cout << blueColor << "server now is listening on port "<< resetColor << sockPort << " | ip: " << hostName << std::endl;
 }
 
 sockaddr_in& ServerSocket::getSocketAddress( void ) {return (socketAddress);}

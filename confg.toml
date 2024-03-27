@@ -1,57 +1,20 @@
 [[server]]
 
-	port = 1336
-	host = 10.0.0.1
-	root = /Users/gothmane/Desktop/second_v/
-	server_name = example1.com
+	port = ["1336", "1338"]
+	host = 127.0.0.1
+	server_name = facebook.com
+	root = /Users/hait-hsa/Desktop/second_v
 	index = index.html
 	allowed_methods = ["GET", "POST"]
 	autoindex = on
 	error_page = ["404", "www/error_pages/404.html"]
 	_clientMaxBodySize = 15555
-
-		[[server.location]]
-			prefix = /ewq
-			autoindex = on
-			index = test.html
-			alias = /eee
-			error_page = ["404", "/404.html"]
-			_clientMaxBodySize = 10215455
-
-		[[server.location]]
-
-			prefix = /aa
-			autoindex = on
-			alias = asdasd/asdasd
-			upload 
-			cgi = .py
 
 		[[server.location]]
 		
-			prefix = /
+			prefix = /ewq/
 			autoindex = off
-			root = /Users/gothmane/Desktop/second_v/
-			index = index.html
-			error_page = ["404", "/404.html"]
-			_clientMaxBodySize = 52428800
-			cgi = .py
-
-
-[[server]]
-
-	port = 1338
-	host = 10.0.0.1
-	root = /Users/gothmane/Desktop/second_v/eee
-	server_name = example1.com
-	index = index.html
-	allowed_methods = ["GET", "POST"]
-	autoindex = on
-	error_page = ["404", "www/error_pages/404.html"]
-	_clientMaxBodySize = 15555
-
-		[[server.location]]
-			prefix = /ewq./you
-			autoindex = off
+			root = /Users/hait-hsa/Desktop/second_v/asd
 			index = test1.html
 			alias = /eee
 			error_page = ["404", "/404.html"]
@@ -69,9 +32,47 @@
 		
 			prefix = /
 			autoindex = off
-			root = /Users/gothmane/Desktop/second_v/
+			root = /Users/hait-hsa/Desktop/second_v/
 			index = index.html
 			error_page = ["404", "/404.html"]
 			_clientMaxBodySize = 52428800
 			cgi = .py
+[[server]]
 
+	port = 1333
+	host = 10.11.8.5
+	server_name = facebook.com
+	root = /Users/hait-hsa/Desktop/second_v
+	index = index.html
+	allowed_methods = ["GET", "POST"]
+	autoindex = on
+	error_page = ["404", "www/error_pages/404.html"]
+	_clientMaxBodySize = 15555
+
+		[[server.location]]
+		
+			prefix = /ewq/
+			autoindex = off
+			root = /Users/hait-hsa/Desktop/second_v/asd
+			index = test1.html
+			alias = /eee
+			error_page = ["404", "/404.html"]
+			_clientMaxBodySize = 10215455
+
+		[[server.location]]
+
+			prefix = /aa
+			autoindex = on
+			alias = asdasd/asdasd
+			upload 
+			cgi = .py
+
+		[[server.location]]
+		
+			prefix = /
+			autoindex = off
+			root = /Users/hait-hsa/Desktop/second_v/
+			index = index.html
+			error_page = ["404", "/404.html"]
+			_clientMaxBodySize = 52428800
+			cgi = .py
