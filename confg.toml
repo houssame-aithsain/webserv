@@ -41,7 +41,7 @@
 
 	port = 1333
 	host = 10.11.8.5
-	server_name = facebook.com
+	server_name = google.com
 	root = /Users/hait-hsa/Desktop/second_v
 	index = index.html
 	allowed_methods = ["GET", "POST"]
