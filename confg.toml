@@ -2,8 +2,8 @@
 
 	port = 1336
 	host = 10.0.0.1
-	root = /Users/gothmane/Desktop/second_v/
 	server_name = example1.com
+	root = /Users/gothmane/Desktop/second_v/
 	index = index.html
 	allowed_methods = ["GET", "POST"]
 	autoindex = on
