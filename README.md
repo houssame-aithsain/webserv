@@ -3,8 +3,8 @@
 <h1>How to Install and Run the Project</h1>
 <ol>
    <li>Clone the Repository</li>
-   <li>Configure the Server</li>
-   <p>lorem</p>
+   <li>Configure confg.toml file</li>
+   <p>path: ```./Webserv/conf/conf.toml```</p>
    <li>Clone the Repository</li>
    <li>Clone the Repository</li>
    <li>Clone the Repository</li>
