@@ -63,6 +63,7 @@
 <p>The web server supports customizable configuration through a configuration file, allowing users to fine-tune server behavior. Below is an example configuration file with explanations of its parameters.</p>
 <p><strong>Example Configuration:</strong></p>
 <pre><code>
+
 [[server]]
 
 	port = [1336, 1338]
@@ -109,18 +110,6 @@
 			prefix = /aa
 			allowed_methods = [GET,POST, DELETE]
 			error_page = [404, /404.html]
-			cgi = .py
-
-		[[server.location]]
-		
-			prefix = /
-			upload_path = /Users/hait-hsa/Desktop/Webserv/src
-			autoindex = on
-			root = /Users/hait-hsa/Desktop/Webserv/src
-			allowed_methods = [GET, POST, DELETE]
-			index = index.html
-			error_page = [404, /aa]
-			_clientMaxBodySize = 1021545510215455
 			cgi = .py
 
 </code></pre>
