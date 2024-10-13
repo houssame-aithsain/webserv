@@ -35,5 +35,5 @@
    listening on port 2020 | ip: 127.0.0.1 | SVname: 1.com
    </code>
    </pre>
-
+   <p>Great! Now that the server is running, the sockets have been bound correctly and are listening for any incoming requests from the client to handle.</p>
 </ol>
