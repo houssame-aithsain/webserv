@@ -37,3 +37,9 @@
    </pre>
    <p>Great! Now that the server is running, the sockets have been bound correctly and are listening for any incoming requests from the client to handle.</p>
 </ol>
+<h1>How to Use the Server</h1>
+<ol>
+   <li><strong>Access the Web Server</strong></li>
+   <p>Open your web browser and enter the server’s address:</p>
+   <pre><code>http://<server-ip>:<port></code></pre>
+</ol>
