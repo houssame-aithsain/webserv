@@ -5,7 +5,25 @@
    <li><strong>Clone the Repository</strong></li>
    <li><strong>Configure confg.toml file</strong></li>
    <pre><code>path: ./Webserv/conf/conf.toml</code></pre>
-   <li>Clone the Repository</li>
+   <li><strong>Add the folder's path</strong></li>
+   <pre><code>port = [1336, 1338]
+	host = 127.0.0.1
+	server_name = facebook.com
+	root = /Users/hait-hsa/Desktop/Webserv/src
+	index = index.html
+	allowed_methods = [GET,POST, DELETE]
+	autoindex = on
+	_clientMaxBodySize = 1021545510215455
+
+		[[server.location]]
+			prefix = /
+			autoindex = off
+			root = /Users/hait-hsa/Desktop/Webserv/src
+			index = index.html
+			error_page = [404, /404.html]
+			allowed_methods = [ GET, POST, DELETE]
+			_clientMaxBodySize = 1021545510215455
+   </code></pre>
    <li>Clone the Repository</li>
    <li>Clone the Repository</li>
 </ol>
