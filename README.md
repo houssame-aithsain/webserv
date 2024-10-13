@@ -9,7 +9,7 @@
    <pre><code>port = [1336, 1338]
 	host = 127.0.0.1
 	server_name = facebook.com
-	root = /Users/hait-hsa/Desktop/Webserv/src
+	root = /Users/hait-hsa/Desktop/Webserv/src <---------here
 	index = index.html
 	allowed_methods = [GET,POST, DELETE]
 	autoindex = on
@@ -18,7 +18,7 @@
 		[[server.location]]
 			prefix = /
 			autoindex = off
-			root = /Users/hait-hsa/Desktop/Webserv/src
+			root = /Users/hait-hsa/Desktop/Webserv/src <---------here
 			index = index.html
 			error_page = [404, /404.html]
 			allowed_methods = [ GET, POST, DELETE]
