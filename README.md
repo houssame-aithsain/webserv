@@ -42,4 +42,5 @@
    <li><strong>Access the Web Server</strong></li>
    <p>Open your web browser and enter the server’s address:</p>
    <pre><code>http://server-ip:port</code></pre>
+   <p>Replace <strong>server-ip</strong> and <strong>port</strong> with the IP address and port specified in the configuration file.</p>
 </ol>
