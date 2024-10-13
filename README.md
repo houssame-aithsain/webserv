@@ -47,9 +47,7 @@
    <p>You can interact with the server by making HTTP requests using a browser, <code>curl</code>, or any HTTP client tool (like Postman). Here’s how to use the different HTTP methods:</p>
    <ul>
       <li><strong>GET Request:</strong></li>
-      <p>
-         To view a webpage or resource, simply enter the URL in your browser or use:
+      <p>To view a webpage or resource, simply enter the URL in your browser or use:</p>
          <code>curl http://server-ip:port/resource</code>
-      </p>
    </ul>
 </ol>
