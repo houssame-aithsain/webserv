@@ -1,6 +1,6 @@
 <h1>Webserv</h1>
 <p>This back-end project aims to build a simple web server that allows users to navigate their websites through a browser. The server handles all GET requests on the back-end, delivering accurate results. It supports GET, POST, and DELETE methods and includes a customizable configuration file, enabling users to fine-tune the server to their specific needs. The web server also supports virtual servers, each capable of managing multiple ports, making it easy to handle different websites simultaneously. Built on non-blocking I/O and CGI technologies, the server ensures that no client experiences delays, even while others are uploading files or browsing the site.</p>
-<h1>How to Install and Run the Project</h1>
+<h2>How to Install and Run the Project</h2>
 <ol>
    <li><strong>Clone the Repository</strong></li>
    <li><strong>Configure confg.toml file</strong></li>
@@ -37,7 +37,7 @@
    </pre>
    <p>Great! Now that the server is running, the sockets have been bound correctly and are listening for any incoming requests from the client to handle.</p>
 </ol>
-<h1>How to Use the Server</h1>
+<h2>How to Use the Server</h2>
 <ol>
    <li><strong>Access the Web Server</strong></li>
    <p>Open your web browser and enter the server’s address:</p>
@@ -59,7 +59,7 @@
          <pre><code>curl -X DELETE http://server-ip:port/resource</code></pre>
    </ul>
 </ol>
-<h1>Custom Configuration</h1>
+<h2>Custom Configuration</h2>
 <p>The web server supports customizable configuration through a configuration file, allowing users to fine-tune server behavior. Below is an example configuration file with explanations of its parameters.</p>
 <p><strong>Example Configuration:</strong></p>
 <pre><code>
@@ -166,3 +166,47 @@
         <strong>upload_path:</strong> Path where uploaded files will be stored (only in certain locations).
     </li>
 </ul>
+<h2>Testing</h2>
+<p>This section describes how to test the web server using <strong>Siege</strong> for load testing and <strong>Postman</strong> for API testing.</p>
+
+<h3>1. Testing with Siege</h3>
+<p><strong>Siege</strong> is a command-line tool that can simulate concurrent users to test the performance of your web server.</p>
+
+<h4>1.1 Installation</h4>
+<p>To install Siege, you can use the following commands:</p>
+<pre><code>sudo apt-get install siege  # For Debian/Ubuntu-based systems
+brew install siege            # For macOS using Homebrew</code></pre>
+
+<h4>1.2 Running Siege Tests</h4>
+<p>To test your web server with Siege, you can use the following command:</p>
+<pre><code>siege -c 10 -r 20 http://127.0.0.1:1336/</code></pre>
+<p>This command simulates 10 concurrent users (-c) making 20 repetitions (-r) of requests to your server's homepage.</p>
+
+<h4>1.3 Custom Configuration</h4>
+<p>You can create a <code>urls.txt</code> file containing the URLs you want to test, and then run Siege against that file:</p>
+<pre><code>siege -f urls.txt</code></pre>
+
+<h3>2. Testing with Postman</h3>
+<p><strong>Postman</strong> is a powerful GUI tool for testing APIs. You can use it to send requests to your web server and view the responses.</p>
+
+<h4>2.1 Installation</h4>
+<p>You can download and install Postman from the official website: <a href="https://www.postman.com/downloads/" target="_blank">Postman Downloads</a>.</p>
+
+<h4>2.2 Sending Requests</h4>
+<p>After installing Postman, you can create and send various HTTP requests to your web server:</p>
+<ul>
+    <li><strong>GET Request:</strong> Use Postman to make a GET request to your server's endpoint (e.g., <code>http://127.0.0.1:1336/</code>).</li>
+    <li><strong>POST Request:</strong> To test POST requests, select the POST method, enter the URL, and provide the request body in JSON format.</li>
+    <li><strong>DELETE Request:</strong> Select the DELETE method to test resource deletion from your server.</li>
+</ul>
+
+<h4>2.3 Testing Scenarios</h4>
+<p>You can set up different testing scenarios in Postman, such as:</p>
+<ul>
+    <li>Creating a new resource with a POST request and verifying the response.</li>
+    <li>Fetching the created resource with a GET request and checking its details.</li>
+    <li>Deleting the resource with a DELETE request and confirming its removal.</li>
+</ul>
+
+<h4>2.4 Saving and Sharing Collections</h4>
+<p>Postman allows you to save requests in collections. You can export these collections and share them with your team for consistent testing.</p>
