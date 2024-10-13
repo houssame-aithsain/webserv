@@ -113,3 +113,56 @@
 			cgi = .py
 
 </code></pre>
+<ul>
+    <li>
+        <strong>server:</strong> Defines a web server instance.
+    </li>
+    <li>
+        <strong>port:</strong> A list of ports the server will listen on. For example, [1336, 1338].
+    </li>
+    <li>
+        <strong>host:</strong> The IP address the server binds to (e.g., 127.0.0.1).
+    </li>
+    <li>
+        <strong>server_name:</strong> The name of the server (e.g., facebook.com).
+    </li>
+    <li>
+        <strong>root:</strong> The root directory for serving files.
+    </li>
+    <li>
+        <strong>index:</strong> The default index file (e.g., index.html).
+    </li>
+    <li>
+        <strong>allowed_methods:</strong> Supported HTTP methods like GET, POST, and DELETE.
+    </li>
+    <li>
+        <strong>autoindex:</strong> If set to on, directories without an index file will be listed.
+    </li>
+    <li>
+        <strong>_clientMaxBodySize:</strong> Maximum size for client uploads.
+    </li>
+    <li>
+        <strong>server.location:</strong> Configures specific routes (locations) within the server.
+    </li>
+    <li>
+        <strong>prefix:</strong> The path prefix for this location (e.g., /, /aa, /eee).
+    </li>
+    <li>
+        <strong>autoindex:</strong> Whether to display a directory listing for this location.
+    </li>
+    <li>
+        <strong>root:</strong> The root directory for this location.
+    </li>
+    <li>
+        <strong>index:</strong> The default file to serve when accessing this location.
+    </li>
+    <li>
+        <strong>error_page:</strong> Specifies custom error pages for HTTP status codes (e.g., 404).
+    </li>
+    <li>
+        <strong>cgi:</strong> Defines a CGI script handler (e.g., .py for Python scripts).
+    </li>
+    <li>
+        <strong>upload_path:</strong> Path where uploaded files will be stored (only in certain locations).
+    </li>
+</ul>
