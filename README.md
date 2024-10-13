@@ -26,6 +26,14 @@
    </code></pre>
    <li><strong>Compile the project</strong></li>
    <pre><code>$ make</code></pre>
-   <li>Run the server</li>
-   <pre><code>./webserv conf/confg.toml</code></pre>
+   <li><strong>Run the server</strong></li>
+   <pre><code>./webserv conf/confg.toml</code>
+   <code>
+   listening on port 1336 | ip: 127.0.0.1 | SVname: facebook.com
+   listening on port 1338 | ip: 127.0.0.1 | SVname: facebook.com
+   listening on port 1339 | ip: 127.0.0.1 | SVname: 1.com
+   listening on port 2020 | ip: 127.0.0.1 | SVname: 1.com
+   </code>
+   </pre>
+
 </ol>
