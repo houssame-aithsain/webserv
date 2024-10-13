@@ -59,3 +59,46 @@
          <pre><code>curl -X DELETE http://server-ip:port/resource</code></pre>
    </ul>
 </ol>
+<h1>Custom Configuration</h1>
+<p>The web server supports customizable configuration through a configuration file, allowing users to fine-tune server behavior. Below is an example configuration file with explanations of its parameters.</p>
+<p><strong>Example Configuration:</strong></p>
+<pre><code>
+   [[server]]
+
+	port = [1336, 1338]
+	host = 127.0.0.1
+	server_name = facebook.com
+	root = /Users/hait-hsa/Desktop/Webserv/src
+	index = index.html
+	allowed_methods = [GET,POST, DELETE]
+	autoindex = on
+	_clientMaxBodySize = 1021545510215455
+
+		[[server.location]]
+			prefix = /
+			autoindex = off
+			root = /Users/hait-hsa/Desktop/Webserv/src
+			index = index.html
+			error_page = [404, /404.html]
+			allowed_methods = [ GET, POST, DELETE]
+			_clientMaxBodySize = 1021545510215455
+
+		[[server.location]]
+			prefix = /aa
+			autoindex = on
+			root = /Users/hait-hsa/Desktop/Webserv/src
+			index = test.html
+			error_page = [404, /404.html]
+			allowed_methods = [ GET, POST, DELETE]
+			_clientMaxBodySize = 1021545510215455
+
+		[[server.location]]
+			prefix = /eee
+			autoindex = off
+			root = /Users/hait-hsa/Desktop/Webserv/src
+			index = test1.html
+			error_page = [404, /404.html]
+			allowed_methods = [ GET, POST, DELETE]
+			_clientMaxBodySize = 1021545510215455
+
+</code></pre>
