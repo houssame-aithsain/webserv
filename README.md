@@ -94,6 +94,7 @@
 
 
 [[server]]
+
 	port = [ 1339, 2020]
 	host = 127.0.0.1
 	server_name = 1.com
