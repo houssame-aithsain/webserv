@@ -41,5 +41,5 @@
 <ol>
    <li><strong>Access the Web Server</strong></li>
    <p>Open your web browser and enter the server’s address:</p>
-   <pre><code>http://<server-ip>:<port></code></pre>
+   <pre><code>`http://<server-ip>:<port>`</code></pre>
 </ol>
