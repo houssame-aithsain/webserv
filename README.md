@@ -1,90 +1,80 @@
-```markdown
-# CppWebServ
+<svg fill="none" viewBox="0 0 600 300" width="600" height="300" xmlns="http://www.w3.org/2000/svg">
+  <foreignObject width="100%" height="100%">
+    <div xmlns="http://www.w3.org/1999/xhtml">
+      <style>
+        @keyframes hi  {
+            0% { transform: rotate( 0.0deg) }
+           10% { transform: rotate(14.0deg) }
+           20% { transform: rotate(-8.0deg) }
+           30% { transform: rotate(14.0deg) }
+           40% { transform: rotate(-4.0deg) }
+           50% { transform: rotate(10.0deg) }
+           60% { transform: rotate( 0.0deg) }
+          100% { transform: rotate( 0.0deg) }
+        }
 
-## Introduction
-CppWebServ is a lightweight, high-performance web server built using C++. It supports basic HTTP methods such as GET, POST, and DELETE. The server is configurable, and users can define various settings, such as the IP address, port, and limits for request bodies. The project includes CGI support for handling dynamic content.
+        @keyframes gradient {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
 
-- **Live Site**: https://houssame-aithsain.github.io/
-- **Project Blog**:
-- **Author(s) LinkedIn**:
-  - [LinkedIn Profile] https://www.linkedin.com/in/houssame-aithsain
+        .container {
+          --color-main: #5452ee;
+          --color-primary: #e73c7e;
+          --color-secondary: #23a6d5;
+          --color-tertiary: #ffff;
 
-## Installation
+          background: linear-gradient(-45deg, var(--color-main), var(--color-primary), var(--color-secondary), var(--color-tertiary));
+          background-size: 400% 400%;
+          animation: gradient 15s ease infinite;
 
-To install and run CppWebServ locally, follow these steps:
+          width: 100%;
+          height: 300px;
 
-### Prerequisites
-- **C++ Compiler**: Ensure you have a working C++ compiler (e.g., `g++`).
-- **Make**: Ensure `make` is installed.
-- **Dependencies**: Make sure to have any additional libraries installed, such as `libcgi`, `sys/socket.h`, `netinet/in.h`.
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: white;
 
-### Steps
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        }
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/houssame-aithsain/CppWebServ.git
-   cd CppWebServ
-   ```
+        .hi {
+          animation: hi 1.5s linear -0.5s infinite;
+          display: inline-block;
+          transform-origin: 70% 70%;
+        }
 
-2. Compile the project:
-   ```bash
-   make
-   ```
+        @media (prefers-color-scheme: light) {
+          .container {
+            --color-main: #F15BB5;
+            --color-primary: #24b0ef;
+            --color-secondary: #4526f6;
+            --color-tertiary: #f6f645;
+          }
+        }
 
-3. Run the server:
-   ```bash
-   ./cppwebserv [path to configuration file]
-   ```
+        @media (prefers-reduced-motion) {
+          .container {
+            animation: none;
+          }
 
-4. Test the server by accessing it via a browser or tools like `curl`:
-   ```bash
-   curl http://127.0.0.1:1336
-   ```
+          .hi {
+            animation: none;
+          }
+        }
+      </style>
 
-## Usage
-
-Once the server is running, you can make requests using a browser or HTTP tools:
-
-- **GET**: Access static content or dynamically generated content through CGI.
-- **POST**: Send data to the server (e.g., form submissions).
-- **DELETE**: Remove specific files or data from the server.
-
-The server configuration can be customized through a config file that allows specifying:
-- IP Address
-- Hostname
-- Port
-- URL redirection
-- Body size limit
-- CGI path
-
-### Example Usage:
-```bash
-curl -X POST http://127.0.0.1:1336/upload -d "file=@test.txt"
-```
-
-## Contributing
-
-Contributions are welcome! To contribute:
-
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-branch`).
-3. Make your changes and commit them (`git commit -m 'Add new feature'`).
-4. Push to the branch (`git push origin feature-branch`).
-5. Open a pull request.
-
-Please ensure all new features and bug fixes come with tests.
-
-## Related Projects
-
-Here are some projects related to CppWebServ:
-- [Nginx](https://nginx.org)
-- [Apache](https://httpd.apache.org)
-
-## Licensing
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Screenshot
-
-![CppWebServ Screenshot](./src/ScreenShot.png)
-```
+      <div class="container">
+        <h1>Hi there, my name is Nikola <div class="hi">👋</div></h1>
+      </div>
+    </div>
+  </foreignObject>
+</svgg
