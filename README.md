@@ -207,6 +207,3 @@ brew install siege            # For macOS using Homebrew</code></pre>
     <li>Fetching the created resource with a GET request and checking its details.</li>
     <li>Deleting the resource with a DELETE request and confirming its removal.</li>
 </ul>
-
-<h4>2.4 Saving and Sharing Collections</h4>
-<p>Postman allows you to save requests in collections. You can export these collections and share them with your team for consistent testing.</p>
