@@ -52,6 +52,8 @@
       <li><strong>POST Request:</strong></li>
       <p>To send data to the server, such as submitting a form or uploading a file:</p>
          <pre><code>curl -X POST -d "key=value" http://server-ip:port/resource</code></pre>
+      <li><strong>If uploading a file:</strong></li>
+         <pre><code>curl -X POST -F "file=@/path/to/file" http://server-ip:port/resource</code></pre>
 
    </ul>
 </ol>
