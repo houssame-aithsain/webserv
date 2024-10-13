@@ -1,18 +1,5 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/01/29 20:25:53 by hait-hsa          #+#    #+#              #
-#    Updated: 2024/03/14 14:53:47 by gothmane         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
-
 CC			=	c++
-CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
+CXXFLAGS	=	-Wall -Wextra -Werror -std=c++98 #-fsanitize=address -g
 
 SRC			=	main.cpp webserver/server/Server.cpp parsing/parser.cpp \
 				request_response/Response.cpp webserver/clientSocket/Client.cpp \
@@ -28,6 +15,7 @@ RM			=	rm -rf
 OBJS		=	$(SRC:.cpp=.o)
 
 all			:	$(NAME)
+				rm -rf ./upload
 
 $(NAME)		:	$(OBJS) $(HEADERS)
 				$(CC) $(CXXFLAGS) $(OBJS) -o $(NAME)
@@ -36,7 +24,7 @@ $(NAME)		:	$(OBJS) $(HEADERS)
 				$(CC) $(CXXFLAGS) -c $< -o $@
 
 clean		:
-				$(RM) $(OBJS)
+				$(RM) $(OBJS) rm -rf ./upload
 
 fclean		:	clean
 				$(RM) $(NAME)

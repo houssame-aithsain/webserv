@@ -1,25 +1,16 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: gothmane <gothmane@student.1337.ma>        +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/03/17 15:53:27 by gothmane          #+#    #+#             */
-/*   Updated: 2024/03/18 15:54:25 by gothmane         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "parsing/parser.hpp"
 #include "webserver/server/Server.hpp"
 
-int main()
+int main(int ac, char **av)
 {
     Parser p;
     Server s;
 
     try {
-        p.ft_read_nd_parse("confg.toml");
+        if (ac != 2)
+            throw "Error: Invalid number of arguments";
+
+        p.ft_read_nd_parse(av[1]);
         s.initializeSocket(p.wrapper);
         s.runServer(p);
     } catch (const char * error) {
