@@ -48,6 +48,6 @@
    <ul>
       <li><strong>GET Request:</strong></li>
       <p>To view a webpage or resource, simply enter the URL in your browser or use:</p>
-         <code>curl http://server-ip:port/resource</code>
+         <pre><code>curl http://server-ip:port/resource</code></pre>
    </ul>
 </ol>
