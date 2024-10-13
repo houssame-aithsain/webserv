@@ -92,15 +92,6 @@
 			allowed_methods = [ GET, POST, DELETE]
 			_clientMaxBodySize = 1021545510215455
 
-		[[server.location]]
-			prefix = /eee
-			autoindex = off
-			root = /Users/hait-hsa/Desktop/Webserv/src
-			index = test1.html
-			error_page = [404, /404.html]
-			allowed_methods = [ GET, POST, DELETE]
-			_clientMaxBodySize = 1021545510215455
-
 
 [[server]]
 
