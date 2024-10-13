@@ -63,7 +63,7 @@
 <p>The web server supports customizable configuration through a configuration file, allowing users to fine-tune server behavior. Below is an example configuration file with explanations of its parameters.</p>
 <p><strong>Example Configuration:</strong></p>
 <pre><code>
-   [[server]]
+[[server]]
 
 	port = [1336, 1338]
 	host = 127.0.0.1
