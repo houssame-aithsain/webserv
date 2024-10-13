@@ -4,9 +4,7 @@
 <ol>
    <li><strong>Clone the Repository</strong></li>
    <li><strong>Configure confg.toml file</strong></li>
-      ```bash
-      path: ./Webserv/conf/conf.toml
-      ```
+   <pre><code>path: ./Webserv/conf/conf.toml</code></pre>
    <li>Clone the Repository</li>
    <li>Clone the Repository</li>
    <li>Clone the Repository</li>
