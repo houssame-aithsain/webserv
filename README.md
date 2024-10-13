@@ -207,4 +207,5 @@ brew install siege            # For macOS using Homebrew</code></pre>
     <li>Fetching the created resource with a GET request and checking its details.</li>
     <li>Deleting the resource with a DELETE request and confirming its removal.</li>
 </ul>
+<h2>Project Overview</h2>
 <img src="./src/ScreenShot.png">
