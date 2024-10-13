@@ -4,7 +4,7 @@
 <ol>
    <li><strong>Clone the Repository</strong></li>
    <li><strong>Configure confg.toml file</strong></li>
-   <pre><code>path: ./Webserv/conf/conf.toml</code></pre>
+   <pre><code>path: ./Webserv/conf/confg.toml</code></pre>
    <li><strong>Add the folder's path</strong></li>
    <pre><code>port = [1336, 1338]
 	host = 127.0.0.1
@@ -25,6 +25,7 @@
 			_clientMaxBodySize = 1021545510215455
    </code></pre>
    <li><strong>Compile the project</strong></li>
-   <pre><code>$webserv> make</code></pre>
-   <li>Clone the Repository</li>
+   <pre><code>$ make</code></pre>
+   <li>Run the server</li>
+   <pre><code>./webserv conf/confg.toml</code></pre>
 </ol>
