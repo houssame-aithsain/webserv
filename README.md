@@ -24,6 +24,7 @@
 			allowed_methods = [ GET, POST, DELETE]
 			_clientMaxBodySize = 1021545510215455
    </code></pre>
-   <li>Clone the Repository</li>
+   <li><strong>Compile the project</strong></li>
+   <pre><code>$webserv> make</code></pre>
    <li>Clone the Repository</li>
 </ol>
