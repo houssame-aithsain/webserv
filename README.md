@@ -54,6 +54,8 @@
          <pre><code>curl -X POST -d "key=value" http://server-ip:port/resource</code></pre>
       <li><strong>If uploading a file:</strong></li>
          <pre><code>curl -X POST -F "file=@/path/to/file" http://server-ip:port/resource</code></pre>
-
+      <li><strong>DELETE Request:</strong></li>
+      <p>To delete a resource from the server:</p>
+         <pre><code>curl -X DELETE http://server-ip:port/resource</code></pre>
    </ul>
 </ol>
