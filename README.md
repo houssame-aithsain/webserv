@@ -44,7 +44,7 @@
    <pre><code>http://server-ip:port</code></pre>
    <p>Replace <strong>server-ip</strong> and <strong>port</strong> with the IP address and port specified in the configuration file.</p>
    <li><strong>Make Requests to the Server</strong></li>
-   <p>You can interact with the server by making HTTP requests using a browser, <code>curl</code>, or any HTTP client tool (like Postman). Here’s how to use the different HTTP methods:</p>
+   <p>You can interact with the server by making HTTP requests using a browser, <code>curl</code>, or any HTTP client tool (like <code>Postman</code>). Here’s how to use the different HTTP methods:</p>
    <ul>
       <li><strong>GET Request:</strong></li>
       <p>To view a webpage or resource, simply enter the URL in your browser or use:</p>
