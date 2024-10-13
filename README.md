@@ -27,7 +27,7 @@
    <li><strong>Compile the project</strong></li>
    <pre><code>$ make</code></pre>
    <li><strong>Run the server</strong></li>
-   <pre><code>./webserv conf/confg.toml</code>
+   <pre><code>$ ./webserv conf/confg.toml</code>
    <code>
    listening on port 1336 | ip: 127.0.0.1 | SVname: facebook.com
    listening on port 1338 | ip: 127.0.0.1 | SVname: facebook.com
